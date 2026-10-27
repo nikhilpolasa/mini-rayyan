@@ -19,7 +19,7 @@ def selected_version(
 ) -> str | None:
     """Select the latest completed processing version for a record's queries."""
     statement = (
-        select(m.RunLog.rule_set_version)
+        select(m.RunLog)
         .join(m.QueryRecord, m.QueryRecord.query_id == m.RunLog.query_id)
         .where(
             m.QueryRecord.record_id == record_id,
@@ -27,11 +27,18 @@ def selected_version(
             m.RunLog.status == "completed",
         )
         .order_by(m.RunLog.id.desc())
-        .limit(1)
     )
     if query_id is not None:
         statement = statement.where(m.RunLog.query_id == query_id)
-    context = session.scalar(statement)
+    run = next(
+        (
+            row
+            for row in session.scalars(statement)
+            if row.counts_json.get("record_id") in {None, record_id}
+        ),
+        None,
+    )
+    context = run.rule_set_version if run else None
     if context and step in {"screen", "pico"}:
         from .pipeline import _record_version
 

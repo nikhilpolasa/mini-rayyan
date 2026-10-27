@@ -123,11 +123,16 @@ outcomes, with three documented keyword-context false positives; this does not
 measure real PubMed accuracy. Independently label actual fetched abstracts using
 `fixtures/pubmed_screening.template.json` before reporting real-data metrics.
 
-The current algorithm versions are `screen-v2`, `pico-v2` and `dedup-v2`.
+The current algorithm versions are `screen-v2`, `pico-v2` and `dedup-v3`.
 This advances past the original stubs, so rerunning processes old cached results
 under new versions while preserving their history and all human decisions. The
 shared matching thresholds are imported by the grouping service. Future algorithm
 changes must advance the corresponding version constants again.
+
+A saved human Include triggers record-only PICO tagging in a separate transaction,
+without a full pipeline run. A tagging failure is logged and leaves the reviewer
+decision committed. Record detail and CSV export accept optional `query_id` to
+select that query's machine context; omitting it keeps the latest-context view.
 
 Manual live check (requires configured `NCBI_EMAIL` and network access):
 

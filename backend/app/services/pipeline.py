@@ -272,6 +272,31 @@ def _step(session: Session, query_id: int, step: str, version: str, operation) -
         raise
 
 
+def _screen_context(session: Session, query: m.Query):
+    """Use the same ordered criteria/query context for pipeline and record tagging."""
+    criteria = list(
+        session.scalars(
+            select(m.Criterion)
+            .where(m.Criterion.project_id == query.project_id)
+            .order_by(m.Criterion.key)
+        )
+    )
+    # screen() respects caller order, not alphabetic criterion key order.
+    priority = {key: index for index, key in enumerate(screening.CRITERIA)}
+    criteria.sort(key=lambda item: (priority.get(item.key, len(priority)), item.key))
+    groups = query_groups(query.text)
+    screen_version = fingerprint(
+        SCREEN_VERSION,
+        {
+            "query_groups": groups,
+            "criteria": [decisions.columns(item) for item in criteria],
+        },
+    )
+    active = [criterion.key for criterion in criteria if criterion.active]
+
+    return groups, active, screen_version
+
+
 def process(session: Session, query: m.Query) -> dict:
     """Dedup globally, screen visible query records, then tag effective Includes."""
     records = list(
@@ -296,25 +321,7 @@ def process(session: Session, query: m.Query) -> dict:
     )
     state = dedup.state(session)
     visible = [record for record in records if record.id not in state["hidden"]]
-    criteria = list(
-        session.scalars(
-            select(m.Criterion)
-            .where(m.Criterion.project_id == query.project_id)
-            .order_by(m.Criterion.key)
-        )
-    )
-    # screen() respects caller order, not alphabetic criterion key order.
-    priority = {key: index for index, key in enumerate(screening.CRITERIA)}
-    criteria.sort(key=lambda item: (priority.get(item.key, len(priority)), item.key))
-    groups = query_groups(query.text)
-    screen_version = fingerprint(
-        SCREEN_VERSION,
-        {
-            "query_groups": groups,
-            "criteria": [decisions.columns(item) for item in criteria],
-        },
-    )
-    active = [criterion.key for criterion in criteria if criterion.active]
+    groups, active, screen_version = _screen_context(session, query)
 
     def screen_step(run):
         processed, excluded = 0, 0
@@ -373,37 +380,96 @@ def process(session: Session, query: m.Query) -> dict:
                 != "include"
             ):
                 continue
-            record_version = _record_version(pico_version, record)
-            if session.scalar(
-                select(m.PicoSpan.id).where(
-                    m.PicoSpan.record_id == record.id,
-                    m.PicoSpan.pico_version == record_version,
-                    m.PicoSpan.source == "machine",
-                )
-            ):
-                continue
-            spans = pico.tag_pico(
-                record.abstract or "", [term for group in groups for term in group]
-            )
-            for span in spans:
-                decisions.validate_span(record.abstract or "", span)
-                session.add(
-                    m.PicoSpan(
-                        record_id=record.id,
-                        pico_version=record_version,
-                        rule_set_version=record_version,
-                        run_id=run.id,
-                        source="machine",
-                        **span,
-                    )
-                )
-            processed += 1
-            tagged += len(spans)
+            counts = _tag_record(session, record, groups, pico_version, run)
+            processed += counts["records_tagged"]
+            tagged += counts["pico_spans_added"]
         session.flush()
         return {"records_tagged": processed, "pico_spans_added": tagged}
 
     counts.update(_step(session, query.id, "pico", pico_version, pico_step))
     return counts
+
+
+def _tag_record(
+    session: Session, record: m.Record, groups, context: str, run: m.RunLog
+) -> dict:
+    """Store only missing machine spans, preserving human edits and old versions."""
+    version = _record_version(context, record)
+    if session.scalar(
+        select(m.PicoSpan.id)
+        .where(
+            m.PicoSpan.record_id == record.id,
+            m.PicoSpan.pico_version == version,
+            m.PicoSpan.source == "machine",
+        )
+        .limit(1)
+    ):
+        return {"records_tagged": 0, "pico_spans_added": 0}
+    spans = pico.tag_pico(
+        record.abstract or "", [term for group in groups for term in group]
+    )
+    for span in spans:
+        decisions.validate_span(record.abstract or "", span)
+        session.add(
+            m.PicoSpan(
+                record_id=record.id,
+                pico_version=version,
+                rule_set_version=version,
+                run_id=run.id,
+                source="machine",
+                **span,
+            )
+        )
+    session.flush()
+    return {"records_tagged": 1, "pico_spans_added": len(spans)}
+
+
+def tag_included_record(record_id: int, bind) -> None:
+    """Tag a committed human Include in independent, record-scoped transactions."""
+    with job_lock, sessionmaker(bind=bind, expire_on_commit=False)() as session:
+        record = session.get(m.Record, record_id)
+        if record is None:
+            return
+        state = dedup.state(session)
+        if (
+            record_id in state["hidden"]
+            or decisions.effective_status(
+                session,
+                record_id,
+                state["membership"].get(record_id),
+                peer_ids=state["peers"].get(record_id),
+            )["label"]
+            != "include"
+        ):
+            return
+        queries = list(
+            session.scalars(
+                select(m.Query)
+                .join(m.QueryRecord)
+                .where(
+                    m.QueryRecord.record_id == record_id,
+                )
+                .order_by(m.Query.version)
+            )
+        )
+        for query in queries:
+            groups, _, screen_version = _screen_context(session, query)
+            context = fingerprint(
+                PICO_VERSION, {"groups": groups, "screen_version": screen_version}
+            )
+            # Numeric record scope keeps this partial run from replacing another
+            # record's latest full-query PICO context in result projections.
+            _step(
+                session,
+                query.id,
+                "pico",
+                context,
+                lambda run: {
+                    "record_id": record_id,
+                    "records_in": 1,
+                    **_tag_record(session, record, groups, context, run),
+                },
+            )
 
 
 def execute(run_id: int, bind) -> None:
