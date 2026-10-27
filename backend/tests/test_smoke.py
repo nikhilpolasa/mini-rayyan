@@ -196,6 +196,8 @@ def test_reset_and_seed_preserve_existing_data(tmp_path, monkeypatch):
         assert len(session.scalars(select(m.QueryRecord)).all()) == 30
         assert len(session.scalars(select(m.GroupMember)).all()) == 2
         assert len(session.scalars(select(m.Decision)).all()) == 3
+        assert len(session.scalars(select(m.Criterion)).all()) == 5
+        assert all(row.active for row in session.scalars(select(m.Criterion)))
     with pytest.raises(RuntimeError, match="empty database"):
         seed_demo.seed_demo()
     with pytest.raises(RuntimeError, match="contains data"):

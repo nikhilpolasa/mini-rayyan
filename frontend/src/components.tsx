@@ -36,7 +36,12 @@ export function Feedback({ action, success }: { action: { isPending: boolean; is
 }
 export function useAction<T, R>(mutationFn: (value: T) => Promise<R>) {
   const client = useQueryClient();
-  return useMutation({ mutationFn, onSuccess: () => client.invalidateQueries() });
+  return useMutation({ mutationFn, onSuccess: async () => {
+    // An initial GET may still contain the pre-mutation snapshot. Cancel it
+    // before refetching, including cached pages that are currently inactive.
+    await client.cancelQueries();
+    await client.invalidateQueries({ refetchType: 'all' });
+  } });
 }
 export const picoLabels = { P: 'Population', I: 'Intervention', C: 'Comparator', O: 'Outcome' };
 

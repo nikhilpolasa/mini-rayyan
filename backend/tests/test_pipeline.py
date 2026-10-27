@@ -186,17 +186,9 @@ def test_query_groups_screening_pico_order_and_new_rule_versions(review, monkeyp
     assert len(calls) == 6
     assert client.get("/api/records/1").json()["pico_spans"] == spans_before
     with factory.begin() as session:
-        session.add(
-            m.Criterion(
-                key="non_human",
-                label="Animal",
-                kind="exclude",
-                description="Animal studies",
-                reason="Human question",
-                source="both",
-                active=True,
-            )
-        )
+        session.get(
+            m.Criterion, "non_human"
+        ).description += " Updated review configuration."
     run(client, id)
     with factory() as session:
         assert session.scalar(select(func.count()).select_from(m.ScreenResult)) == 6
@@ -208,7 +200,11 @@ def test_query_groups_screening_pico_order_and_new_rule_versions(review, monkeyp
     )
     run(client, id)
     assert [call[0] for call in calls] == ["screen"] * 3 + ["pico"] * 2
-    assert all(call[2] == [] for call in calls if call[0] == "screen")
+    assert all(
+        call[2] == ["non_english", "case_report", "simulation", "no_abstract"]
+        for call in calls
+        if call[0] == "screen"
+    )
     assert client.get("/api/records/1").json()["label"] == "exclude"
 
 
@@ -430,7 +426,9 @@ def test_note_does_not_pin_machine_label_and_undo_restores_machine_control(
     override(client, "record", 1, value={"label": "include"})
     override(client, "record", 1, "undo")
     assert client.get("/api/records/1").json()["source"] == "machine"
-    monkeypatch.setattr(pipeline, "SCREEN_VERSION", pipeline.SCREEN_VERSION + "-changed")
+    monkeypatch.setattr(
+        pipeline, "SCREEN_VERSION", pipeline.SCREEN_VERSION + "-changed"
+    )
     monkeypatch.setattr(
         screening,
         "screen",
@@ -476,7 +474,9 @@ def test_pico_add_offsets_validation_and_undo(review):
     assert client.get("/api/records/2").json()["pico_spans"] == []
 
 
-def test_new_query_reuses_machine_results_and_human_exclusion(review, monkeypatch):
+def test_new_query_rescreens_new_concepts_and_preserves_human_exclusion(
+    review, monkeypatch
+):
     client, factory, source = review
     calls = []
 
@@ -492,7 +492,7 @@ def test_new_query_reuses_machine_results_and_human_exclusion(review, monkeypatc
     second = save(client, "second")
     pull(client, second)
     run(client, second)
-    assert calls == ["1", "2", "3"]
+    assert calls == ["1", "2", "2", "3"]
     assert client.get("/api/records/2").json()["label"] == "exclude"
     assert (
         client.get(f"/api/records?query_id={second}&label=exclude").json()["total"] == 1

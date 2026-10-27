@@ -32,6 +32,11 @@ def fingerprint(prefix: str, data) -> str:
     return f"{prefix}-{digest}"
 
 
+def _record_version(context: str, record: m.Record) -> str:
+    """Hash exact content/metadata separately so unchanged records stay reusable."""
+    return fingerprint(f"{context}-record", dedup.record_dict(record))
+
+
 @contextmanager
 def source_client():
     """Choose the configured source and close live clients on every path."""
@@ -298,23 +303,27 @@ def process(session: Session, query: m.Query) -> dict:
             .order_by(m.Criterion.key)
         )
     )
+    # screen() respects caller order, not alphabetic criterion key order.
+    priority = {key: index for index, key in enumerate(screening.CRITERIA)}
+    criteria.sort(key=lambda item: (priority.get(item.key, len(priority)), item.key))
+    groups = query_groups(query.text)
     screen_version = fingerprint(
         SCREEN_VERSION,
-        [
-            {key: value for key, value in decisions.columns(criterion).items()}
-            for criterion in criteria
-        ],
+        {
+            "query_groups": groups,
+            "criteria": [decisions.columns(item) for item in criteria],
+        },
     )
     active = [criterion.key for criterion in criteria if criterion.active]
-    groups = query_groups(query.text)
 
     def screen_step(run):
         processed, excluded = 0, 0
         for record in visible:
+            record_version = _record_version(screen_version, record)
             if session.scalar(
                 select(m.ScreenResult.id).where(
                     m.ScreenResult.record_id == record.id,
-                    m.ScreenResult.rule_set_version == screen_version,
+                    m.ScreenResult.rule_set_version == record_version,
                 )
             ):
                 continue
@@ -329,7 +338,7 @@ def process(session: Session, query: m.Query) -> dict:
             session.add(
                 m.ScreenResult(
                     record_id=record.id,
-                    rule_set_version=screen_version,
+                    rule_set_version=record_version,
                     run_id=run.id,
                     label=result["label"],
                     reason=result["reason"],
@@ -358,16 +367,17 @@ def process(session: Session, query: m.Query) -> dict:
                     session,
                     record.id,
                     state["membership"].get(record.id),
-                    screen_version,
+                    _record_version(screen_version, record),
                     peer_ids=state["peers"].get(record.id),
                 )["label"]
                 != "include"
             ):
                 continue
+            record_version = _record_version(pico_version, record)
             if session.scalar(
                 select(m.PicoSpan.id).where(
                     m.PicoSpan.record_id == record.id,
-                    m.PicoSpan.pico_version == pico_version,
+                    m.PicoSpan.pico_version == record_version,
                     m.PicoSpan.source == "machine",
                 )
             ):
@@ -380,8 +390,8 @@ def process(session: Session, query: m.Query) -> dict:
                 session.add(
                     m.PicoSpan(
                         record_id=record.id,
-                        pico_version=pico_version,
-                        rule_set_version=pico_version,
+                        pico_version=record_version,
+                        rule_set_version=record_version,
                         run_id=run.id,
                         source="machine",
                         **span,

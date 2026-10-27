@@ -16,6 +16,21 @@ from app.services import pipeline
 
 
 @pytest.fixture(autouse=True)
+def isolated_app_database(tmp_path, monkeypatch):
+    """Even lifespan/health tests must never initialize the developer's DB."""
+    from app import db
+
+    engine = create_engine(
+        f"sqlite:///{(tmp_path / 'startup.db').as_posix()}",
+        connect_args={"check_same_thread": False},
+    )
+    monkeypatch.setattr(db, "engine", engine)
+    monkeypatch.setattr(db, "SessionLocal", sessionmaker(bind=engine))
+    yield engine
+    engine.dispose()
+
+
+@pytest.fixture(autouse=True)
 def no_live_http(monkeypatch):
     def blocked(*args, **kwargs):
         pytest.fail("Unit tests may not contact live HTTP services")
@@ -105,17 +120,6 @@ def api_client(review):
                 hit_count=42,
                 query_translation="translated: first",
                 status="fetched",
-            )
-        )
-        session.add(
-            m.Criterion(
-                key="non_human",
-                label="Non-human studies",
-                kind="exclude",
-                description="Exclude animal-only studies.",
-                reason="The review concerns humans.",
-                source="both",
-                active=True,
             )
         )
         session.flush()

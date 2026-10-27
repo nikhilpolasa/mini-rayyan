@@ -16,7 +16,7 @@ def columns(row) -> dict:
 
 def selected_version(session: Session, record_id: int, step: str) -> str | None:
     """Select the latest completed processing version for a record's queries."""
-    return session.scalar(
+    context = session.scalar(
         select(m.RunLog.rule_set_version)
         .join(m.QueryRecord, m.QueryRecord.query_id == m.RunLog.query_id)
         .where(
@@ -27,6 +27,23 @@ def selected_version(session: Session, record_id: int, step: str) -> str | None:
         .order_by(m.RunLog.id.desc())
         .limit(1)
     )
+    if context and step in {"screen", "pico"}:
+        from .pipeline import _record_version
+
+        record = session.get(m.Record, record_id)
+        version = _record_version(context, record)
+        model = m.ScreenResult if step == "screen" else m.PicoSpan
+        if session.scalar(
+            select(model.id)
+            .where(
+                model.record_id == record_id,
+                model.rule_set_version == version,
+            )
+            .limit(1)
+        ):
+            return version
+    # Preserve projections of pre-fix rows whose version was the run context.
+    return context
 
 
 def effective_status(

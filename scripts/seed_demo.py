@@ -11,6 +11,7 @@ from sqlalchemy import select
 
 from app import models as m
 from app.db import Base, SessionLocal, engine, utc_now
+from app.services.criteria import ensure_criteria
 
 
 def seed_demo() -> None:
@@ -111,16 +112,7 @@ def seed_demo() -> None:
                     run_id=runs["dedup"].id,
                 )
             )
-        session.add(
-            m.Criterion(
-                key="non_human",
-                label="Non-human studies",
-                kind="exclude",
-                description="Exclude animal-only studies.",
-                reason="The review concerns humans.",
-                source="both",
-            )
-        )
+        ensure_criteria(session)
         for record in records:
             if record is records[1]:
                 continue  # The duplicate is hidden; demo machine outputs are prewritten fixtures.
