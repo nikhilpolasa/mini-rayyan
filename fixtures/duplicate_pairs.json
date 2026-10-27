@@ -1,0 +1,464 @@
+{
+  "schema_version": 1,
+  "provenance": "10 synthetic pairs. Expected decisions are review guidance, not measured fuzzy scores.",
+  "pairs": [
+    {
+      "id": "DUP-01",
+      "provenance": "synthetic; DEMO identifiers are deliberately not real PubMed IDs",
+      "scenario": "Exact DOI with case and whitespace",
+      "a": {
+        "pmid": "DEMO-A1",
+        "doi": " 10.0000/EXAMPLE.1 ",
+        "title": "Walking and sleep",
+        "abstract": "Synthetic study of walking and sleep outcomes.",
+        "authors": [
+          "Example A"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ]
+      },
+      "b": {
+        "pmid": "DEMO-B1",
+        "doi": "10.0000/example.1",
+        "title": "Walking and sleep",
+        "abstract": "Synthetic study of walking and sleep outcomes.",
+        "authors": [
+          "Example A"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ]
+      },
+      "expected": {
+        "decision": "auto",
+        "match_type": "exact"
+      },
+      "rationale": "Normalized DOI is identical."
+    },
+    {
+      "id": "DUP-02",
+      "provenance": "synthetic; DEMO identifiers are deliberately not real PubMed IDs",
+      "scenario": "Same PMID reappears in another query",
+      "a": {
+        "pmid": "DEMO-REPEAT",
+        "doi": null,
+        "title": "Walking and sleep",
+        "abstract": "Synthetic study of walking and sleep outcomes.",
+        "authors": [
+          "Example A"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ]
+      },
+      "b": {
+        "pmid": "DEMO-REPEAT",
+        "doi": null,
+        "title": "Walking and sleep",
+        "abstract": "Synthetic study of walking and sleep outcomes.",
+        "authors": [
+          "Example A"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ]
+      },
+      "expected": {
+        "decision": "auto",
+        "match_type": "exact"
+      },
+      "rationale": "Same source identifier; ingestion should upsert and link, not insert twice."
+    },
+    {
+      "id": "DUP-03",
+      "provenance": "synthetic; DEMO identifiers are deliberately not real PubMed IDs",
+      "scenario": "Punctuation-only title variation without DOI",
+      "a": {
+        "pmid": "DEMO-A3",
+        "doi": null,
+        "title": "Walking and sleep: a randomized trial",
+        "abstract": "Synthetic study of walking and sleep outcomes.",
+        "authors": [
+          "Example A"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ]
+      },
+      "b": {
+        "pmid": "DEMO-B3",
+        "doi": null,
+        "title": "Walking and sleep - a randomized trial",
+        "abstract": "Synthetic study of walking and sleep outcomes.",
+        "authors": [
+          "Example A"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ]
+      },
+      "expected": {
+        "decision": "auto",
+        "match_type": "fuzzy"
+      },
+      "rationale": "Cleaned titles, first author and year agree."
+    },
+    {
+      "id": "DUP-04",
+      "provenance": "synthetic; DEMO identifiers are deliberately not real PubMed IDs",
+      "scenario": "Whitespace-only title variation without DOI",
+      "a": {
+        "pmid": "DEMO-A4",
+        "doi": null,
+        "title": "Daily walking and sleep quality in adults",
+        "abstract": "Synthetic study of walking and sleep outcomes.",
+        "authors": [
+          "Example A"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ]
+      },
+      "b": {
+        "pmid": "DEMO-B4",
+        "doi": null,
+        "title": "Daily  walking and sleep quality in adults",
+        "abstract": "Synthetic study of walking and sleep outcomes.",
+        "authors": [
+          "Example A"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ]
+      },
+      "expected": {
+        "decision": "auto",
+        "match_type": "fuzzy"
+      },
+      "rationale": "Whitespace normalization makes the titles identical."
+    },
+    {
+      "id": "DUP-05",
+      "provenance": "synthetic; DEMO identifiers are deliberately not real PubMed IDs",
+      "scenario": "Same title and author, adjacent publication year",
+      "a": {
+        "pmid": "DEMO-A5",
+        "doi": null,
+        "title": "Structured exercise and sleep quality in adults",
+        "abstract": "Synthetic study of walking and sleep outcomes.",
+        "authors": [
+          "Example A"
+        ],
+        "year": 2023,
+        "journal": "Synthetic Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ]
+      },
+      "b": {
+        "pmid": "DEMO-B5",
+        "doi": null,
+        "title": "Structured exercise and sleep quality in adults",
+        "abstract": "Synthetic study of walking and sleep outcomes.",
+        "authors": [
+          "Example A"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ]
+      },
+      "expected": {
+        "decision": "auto",
+        "match_type": "fuzzy"
+      },
+      "rationale": "A one-year difference is permitted for a high-confidence title/author match."
+    },
+    {
+      "id": "DUP-06",
+      "provenance": "synthetic; DEMO identifiers are deliberately not real PubMed IDs",
+      "scenario": "Related title but a different cohort qualifier",
+      "a": {
+        "pmid": "DEMO-A6",
+        "doi": null,
+        "title": "Walking and sleep quality in community adults",
+        "abstract": "Synthetic study of walking and sleep outcomes.",
+        "authors": [
+          "Example A"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ]
+      },
+      "b": {
+        "pmid": "DEMO-B6",
+        "doi": null,
+        "title": "Walking and sleep quality in hospital adults",
+        "abstract": "Synthetic study of walking and sleep outcomes.",
+        "authors": [
+          "Example A"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ]
+      },
+      "expected": {
+        "decision": "pending",
+        "match_type": "fuzzy"
+      },
+      "rationale": "Similar titles may describe distinct cohorts; reviewer comparison is needed."
+    },
+    {
+      "id": "DUP-07",
+      "provenance": "synthetic; DEMO identifiers are deliberately not real PubMed IDs",
+      "scenario": "Conference report versus journal article",
+      "a": {
+        "pmid": "DEMO-A7",
+        "doi": null,
+        "title": "Walking and sleep quality in adults",
+        "abstract": "Synthetic study of walking and sleep outcomes.",
+        "authors": [
+          "Example A"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Conference Proceedings",
+        "language": "eng",
+        "pub_types": [
+          "Congress"
+        ],
+        "mesh": [
+          "Humans"
+        ]
+      },
+      "b": {
+        "pmid": "DEMO-B7",
+        "doi": null,
+        "title": "Walking and sleep quality in adults",
+        "abstract": "Synthetic study of walking and sleep outcomes.",
+        "authors": [
+          "Example A"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ]
+      },
+      "expected": {
+        "decision": "pending",
+        "match_type": "fuzzy"
+      },
+      "rationale": "A conference report and a full journal report are not automatically the same paper."
+    },
+    {
+      "id": "DUP-08",
+      "provenance": "synthetic; DEMO identifiers are deliberately not real PubMed IDs",
+      "scenario": "Identical title with years more than one apart",
+      "a": {
+        "pmid": "DEMO-A8",
+        "doi": null,
+        "title": "Exercise and sleep outcomes",
+        "abstract": "Synthetic study of walking and sleep outcomes.",
+        "authors": [
+          "Example A"
+        ],
+        "year": 2018,
+        "journal": "Synthetic Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ]
+      },
+      "b": {
+        "pmid": "DEMO-B8",
+        "doi": null,
+        "title": "Exercise and sleep outcomes",
+        "abstract": "Synthetic study of walking and sleep outcomes.",
+        "authors": [
+          "Example A"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ]
+      },
+      "expected": {
+        "decision": "pending",
+        "match_type": "fuzzy"
+      },
+      "rationale": "The large year difference blocks an automatic merge."
+    },
+    {
+      "id": "DUP-09",
+      "provenance": "synthetic; DEMO identifiers are deliberately not real PubMed IDs",
+      "scenario": "Unrelated titles and authors",
+      "a": {
+        "pmid": "DEMO-A9",
+        "doi": null,
+        "title": "Walking and sleep in adults",
+        "abstract": "Synthetic study of walking and sleep outcomes.",
+        "authors": [
+          "Example A"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ]
+      },
+      "b": {
+        "pmid": "DEMO-B9",
+        "doi": null,
+        "title": "Water quality in river samples",
+        "abstract": "Synthetic study of walking and sleep outcomes.",
+        "authors": [
+          "Sample B"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ]
+      },
+      "expected": {
+        "decision": "none",
+        "match_type": "none"
+      },
+      "rationale": "Titles and authors describe unrelated studies."
+    },
+    {
+      "id": "DUP-10",
+      "provenance": "synthetic; DEMO identifiers are deliberately not real PubMed IDs",
+      "scenario": "Matching title but essential metadata missing",
+      "a": {
+        "pmid": "DEMO-A10",
+        "doi": null,
+        "title": "Exercise and sleep follow-up",
+        "abstract": "Synthetic study of walking and sleep outcomes.",
+        "authors": [],
+        "year": null,
+        "journal": null,
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ]
+      },
+      "b": {
+        "pmid": "DEMO-B10",
+        "doi": null,
+        "title": "Exercise and sleep follow-up",
+        "abstract": "Synthetic study of walking and sleep outcomes.",
+        "authors": [
+          "Example A"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ]
+      },
+      "expected": {
+        "decision": "pending",
+        "match_type": "fuzzy"
+      },
+      "rationale": "Insufficient year and author metadata for an automatic fuzzy merge."
+    }
+  ]
+}

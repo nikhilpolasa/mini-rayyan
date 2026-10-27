@@ -430,7 +430,7 @@ def test_note_does_not_pin_machine_label_and_undo_restores_machine_control(
     override(client, "record", 1, value={"label": "include"})
     override(client, "record", 1, "undo")
     assert client.get("/api/records/1").json()["source"] == "machine"
-    monkeypatch.setattr(pipeline, "SCREEN_VERSION", "screen-v2")
+    monkeypatch.setattr(pipeline, "SCREEN_VERSION", pipeline.SCREEN_VERSION + "-changed")
     monkeypatch.setattr(
         screening,
         "screen",

@@ -1,79 +1,199 @@
-# Mini-Rayyan backend
+# Mini-Rayyan
 
-The API persists immutable query versions, approvals, incremental PubMed fetches,
-duplicate groups, machine results and append-only human decisions. OpenAPI is at
-`/docs`; `Docs/api-examples.json` illustrates every endpoint's contract.
-Screening, PICO and pair scoring still use their existing dummy implementations:
-Maybe, no spans and no matches. The pipeline calls these modules without
-duplicating their future algorithms. CSV exports effective, visible Includes.
+A literature-review workspace: search PubMed, approve and fetch abstracts,
+deduplicate, screen, tag PICO, and review every machine decision. Evidence and
+human decisions remain stored; duplicates are hidden rather than deleted.
 
-From the repository root, on Windows:
+The backend and frontend are implemented. Screening, title matching, PICO rules
+and CSV serialization now have baseline implementations. These are reviewer aids,
+not trained clinical models or a claim of validated medical performance.
+
+## Requirements
+
+- Python 3.11+; the current environment uses Python 3.13.
+- Node.js 22.18+ for the frontend's native Vite configuration loading.
+- A contact email for live NCBI requests. An NCBI API key is optional.
+
+## Backend setup (Windows PowerShell)
+
+Run from the repository root (`mini-rayyan/`):
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r backend/requirements.txt
-Copy-Item .env.example .env
-.\.venv\Scripts\python.exe scripts/reset_db.py
-.\.venv\Scripts\python.exe scripts/seed_demo.py
-.\.venv\Scripts\python.exe -m uvicorn app.main:app --app-dir backend --port 8000
+if (!(Test-Path .env)) { Copy-Item .env.example .env }
 ```
 
-Run tests from the repository root:
+Edit the root `.env` before using live PubMed. Use your own contact email:
+
+```dotenv
+DATABASE_URL=sqlite:///./miniryan.db
+NCBI_TOOL=mini-rayyan
+NCBI_EMAIL=your.email@example.com
+NCBI_API_KEY=
+FETCH_CAP=25
+SOURCE_MODE=live
+CORS_ORIGINS=http://127.0.0.1:5173,http://localhost:5173
+```
+
+Start with a small fetch cap for verification; the normal default is 500.
+Credentials stay in `.env`, which Git ignores. The PubMed base URL is already
+configured in the client; no additional API URL or PubMed login is needed.
+
+Initialize an **empty** database once, then start the backend:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/reset_db.py
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000
+```
+
+Open `http://localhost:8000/docs` for the interactive API and
+`http://localhost:8000/api/health` for liveness. Always launch database scripts and
+Uvicorn from the same directory: relative SQLite URLs resolve against the working
+directory. `reset_db.py` refuses populated databases and never erases data. Use
+an absolute URL or a new database path to start a separate review.
+
+Optional synthetic demo seed, only into an empty database:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/seed_demo.py
+```
+
+The seed contains 3 queries, 10 fictional records, a duplicate pair and human
+decisions. It is not real PubMed evidence. Live fetching stores actual source
+records separately by unique PMID. Hosted PostgreSQL needs an appropriate driver
+and should replace SQLite for deployment on an ephemeral filesystem.
+
+On macOS/Linux use `.venv/bin/python`; the module commands are otherwise the same.
+
+## Frontend setup
+
+In another terminal, from the repository root:
+
+```powershell
+cd frontend
+npm ci
+```
+
+Create `frontend/.env.local` with the backend origin, without `/api`:
+
+```dotenv
+VITE_API_BASE_URL=http://localhost:8000
+```
+
+Then run:
+
+```powershell
+npm run dev
+```
+
+Open the printed Vite URL, normally `http://127.0.0.1:5173`. The exact origin must
+be allowed by backend `CORS_ORIGINS`. Restart Vite after changing its environment.
+If `VITE_API_BASE_URL` is unset, the frontend uses a browser-local mock built from
+`Docs/api-examples.json`. Mock counts/records are fictional and do not verify NCBI
+access. Backend errors do not silently switch a live workspace to mock data.
+
+Pages cover queries, records with label/version/visibility filters and paging,
+record detail/PICO annotations, duplicates, criteria, CSV export and the decision
+log. Abstracts render as escaped React text; PICO offsets are Unicode code points.
+See [frontend/README.md](frontend/README.md) for frontend-specific details.
+
+## Tests and evaluation
+
+From the repository root:
 
 ```powershell
 .\.venv\Scripts\python.exe -m pytest -c backend/pytest.ini -q
+.\.venv\Scripts\python.exe -m pytest -c backend/pytest.ini backend/tests/test_screening.py backend/tests/test_pico_matching_export.py -q
+.\.venv\Scripts\python.exe fixtures/evaluate_screening.py
 ```
 
-From `backend/`, `uvicorn app.main:app --reload --port 8000` and `pytest -q`
-also work with the environment activated. On macOS/Linux the virtualenv Python
-is `.venv/bin/python`.
+From `frontend/`:
 
-The default database is `sqlite:///./miniryan.db`, relative to the working
-directory. Run database scripts and the app from the same directory or set an
-absolute `DATABASE_URL`. The root `.env` is loaded by the database module.
-`CORS_ORIGINS` accepts comma-separated origins. Set a real `NCBI_EMAIL` before
-using live query creation/fetching. `FETCH_CAP` limits each query's pull (default
-500). `SOURCE_MODE=live` selects PubMed; the snapshot adapter remains unimplemented
-pending its format. Source failures return HTTP 503 on query creation or a failed
-fetch run. PostgreSQL requires a suitable driver.
+```powershell
+npm test
+npm run build
+```
 
-`reset_db.py` initializes an empty database and refuses populated databases;
-it never deletes records. Set `DATABASE_URL` to a fresh database to start over.
-`seed_demo.py` also refuses existing data. Its 3 queries, 10 records, duplicate
-pair, and human decisions are entirely synthetic. The API reads the seeded data.
-Frontend remains a placeholder.
+Unit tests block live HTTP, use temporary databases, check exact PICO offsets,
+matching thresholds/conference safety, CSV round trips, rerun stability and human
+history preservation. The fixtures contain 80 synthetic screening cases and 10
+synthetic duplicate pairs. Screening agreement is 77/80 synthetic reference
+outcomes, with three documented keyword-context false positives; this does not
+measure real PubMed accuracy. Independently label actual fetched abstracts using
+`fixtures/pubmed_screening.template.json` before reporting real-data metrics.
 
-Save a query, approve it, start its fetch, then poll its detail or `/api/runs`.
-Once fetched, `POST /api/pipeline/run?query_id=...` queues dedup, screening, then
-PICO. Background jobs create their own sessions and log counts and elapsed seconds.
-Jobs run in-process with a local lock; they do not survive a process crash. Run a
-single backend worker for this Level 1 implementation.
+The current algorithm versions are `screen-v2`, `pico-v2` and `dedup-v2`.
+This advances past the original stubs, so rerunning processes old cached results
+under new versions while preserving their history and all human decisions. The
+shared matching thresholds are imported by the grouping service. Future algorithm
+changes must advance the corresponding version constants again.
 
-Machine versions include deterministic context hashes. Dedup covers all stored
-records. Screen versions depend on the algorithm version and criteria settings;
-records already screened under that version are reused across queries. PICO
-versions also include the active query's concept groups. A new version appends
-outputs. Unchanged reruns reuse outputs and preserve human decisions/spans.
+Manual live check (requires configured `NCBI_EMAIL` and network access):
 
-The records API derives visibility from effective groups; nothing is deleted.
-Human confirmations, rejections and group splits change that projection. A group
-with conflicting human labels keeps all records visible with pending member
-statuses. A later group label resolves the conflict.
+```powershell
+.\.venv\Scripts\python.exe backend/tests/manual_pubmed_smoke.py --query 'sertraline[tiab] AND placebo[tiab]'
+```
 
-Decision examples (all use `POST /api/decisions`):
+It performs a count search, a one-ID search and a single EFetch batch. Successful
+completion verifies access/parsing, not clinical validity. A live fetch remains a
+required checkpoint demonstration; do not substitute mock results for it.
 
-- Record: `entity_type=record`, `entity_id=<record id>`, `action=set_label`,
-  `new_value={"label":"include"}`; `action=note` only adds a note.
-- Pair: `entity_type=pair`, `entity_id="1:2"`, `action=confirm` or `reject`.
-  `merge` and `split` are accepted aliases. Pair IDs are sorted record IDs.
-- Group: `entity_type=group`, `entity_id=<group id>`, `action=split`, `confirm`,
-  or `set_label` with a label object. Labels apply to the group's records.
-- PICO: `entity_type=pico_span`, `action=add`, `entity_id=<record id>`,
-  `new_value={"record_id":1,"label":"P","start":0,"end":6,"text":"Adults"}`.
-  For `relabel`/`remove`, use the target span ID. Human edits append new spans.
-- `action=undo` with the same entity type/ID restores the latest decision's old
-  value by appending another decision. `new_value` may be null for undo.
+## Five-minute demo and Checkpoint 1
 
-Unit tests use a temporary SQLite database and mocked HTTP/source clients, and
-block live network calls. The opt-in live smoke script is
-`backend/tests/manual_pubmed_smoke.py` and requires `NCBI_EMAIL`.
+1. State the review question and criteria from [Step 0](Docs/step0.md).
+2. Save v1 and then v2 using the query examples there. Show actual hit counts and
+   PubMed translations; inspect v1 to demonstrate unchanged query content.
+3. Approve each version, pull a small set, and poll query/run status. Show an
+   overlapping PMID stored once and linked to both versions. This completes the
+   live search/approval/fetch/database portion of Checkpoint 1.
+4. Run the pipeline. Inspect Include/Exclude/Maybe and reasons, the duplicate
+   queue, and PICO annotations. PubMed often has no duplicate pair; use the clearly
+   identified synthetic fixture/seed for that demonstration instead of claiming a
+   real duplicate was found.
+5. Override a label, confirm/reject a pair and edit a PICO span. Add a note. Rerun:
+   show that records and human decisions remain. Toggle a criterion, rerun and
+   inspect the new machine version. Demonstrate undo as another audit entry.
+6. Download effective visible Includes as CSV, inspect the decision log, and
+   explain the two query-change cases in the [one-page loop design](Docs/loop-design.md).
+
+Checkpoint 1 requires the written question/criteria, one-page loop design,
+database design and a successful small **live** run of steps 1-3. The code and
+protocol documents alone do not establish that the live demonstration passed.
+The 60-100 independently reviewed PubMed abstracts are later validation work.
+
+## Rule methods and limits
+
+- **Screening:** MeSH species tags, language metadata and publication types first;
+  animal/title regexes and deterministic language detection as fallbacks.
+  Simulation is a keyword algorithm. Active exclusions precede Maybe. Missing
+  abstracts, missing concepts or uncertain language remain Maybe. Any criterion
+  toggle is logged; relevance terms come from the query, never a hardcoded topic.
+- **Matching:** normalize Unicode/case/punctuation/whitespace; exact normalized
+  PMID or DOI gives 1.0. Distinct known DOIs stay separate. Otherwise RapidFuzz
+  title ratio supplies a [0,1] score. Auto is >=0.95 with first-author agreement,
+  publication years within one, and no conference/journal/page conflict.
+  Scores [0.85,0.95) require review; lower scores are nonmatches. Unsafe high title
+  similarities are capped just below the auto threshold. Strong shared identifiers
+  identify the same paper even if descriptive metadata differs. Collective names
+  are compared in full. Threshold constants live in `matching.py`; the core
+  grouping service imports these same cutoffs.
+- **PICO:** generic population/intervention cues and active query terms; comparator
+  and outcome phrases. Tags index the original stored text, not a normalized copy.
+  Uncontextualized query terms are tentative intervention candidates. Overlapping
+  labels and ambiguous phrases require human review; this baseline is not a trained
+  biomedical tagger.
+- **CSV:** the service uses `csv.DictWriter`, stable fields and a UTF-8 BOM. Its
+  contract returns `str`; encode with `utf-8` because the BOM is already present.
+  Callers select Included rows. The API already exports visible effective Includes
+  with an Excel-friendly BOM and correctly quoted commas/newlines.
+
+The in-process background queue uses independent sessions, a local lock and
+per-step transactions. Run one backend worker; jobs are not durable across process
+crashes. SOURCE_MODE=snapshot selects an adapter whose format/parser is still
+pending organizer specifications. Exact revert, diff views and durable recovery
+remain Level 2 work. Never delete evidence to recover or retry a review.
+
+PubMed content is provided through NCBI/NLM. Inclusion does not imply endorsement;
+abstracts may be copyrighted and should not be redistributed without permission.
+The frontend links the official [NCBI disclaimer](https://www.ncbi.nlm.nih.gov/home/about/policies/).

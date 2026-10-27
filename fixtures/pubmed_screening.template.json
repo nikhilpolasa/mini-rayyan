@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "dataset": "pubmed-screening-review",
+  "provenance": "Pending researcher-supplied PubMed abstracts and independent human labels.",
+  "target_count": 80,
+  "criteria": [
+    "non_human",
+    "non_english",
+    "case_report",
+    "simulation",
+    "no_abstract"
+  ],
+  "cases": [],
+  "case_template": {
+    "id": "PMID-REPLACE",
+    "provenance": "pubmed",
+    "record": {
+      "id": null,
+      "pmid": null,
+      "doi": null,
+      "title": null,
+      "abstract": null,
+      "authors": [],
+      "year": null,
+      "journal": null,
+      "language": null,
+      "pub_types": [],
+      "mesh": [],
+      "query_groups": []
+    },
+    "active_criteria": [
+      "non_human",
+      "non_english",
+      "case_report",
+      "simulation",
+      "no_abstract"
+    ],
+    "expected": {
+      "label": null,
+      "criterion": null
+    },
+    "criterion_matches": {
+      "non_human": null,
+      "non_english": null,
+      "case_report": null,
+      "simulation": null,
+      "no_abstract": null
+    },
+    "label_rationale": null,
+    "reviewer": null,
+    "reviewed_at": null
+  }
+}

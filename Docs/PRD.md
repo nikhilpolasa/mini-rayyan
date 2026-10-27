@@ -4,9 +4,7 @@ Version 1.0 · 27 Oct 2026 · Team: Karthikeya, Jeswanth, Nikhil, plus one NLP t
 Source: Mini-Rayyan Hackathon Pre-Read (Track1_PS.pdf, 24 Oct 2026)
 
 Put this file at `docs/PRD.md`. Requirement IDs (Q1, F2, DD3 and so on) are used in commits, tests and the report.
-
 ---
-
 ## 1. Purpose
 
 Build, in 72 hours, a small version of Rayyan.ai that works end to end.
