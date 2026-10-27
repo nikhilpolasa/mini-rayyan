@@ -1,0 +1,379 @@
+{
+  "description": "Illustrative persisted API contracts. Optional query_id on record detail and CSV selects that query's machine context; omitted selectors retain latest-context behaviour. Human decisions remain authoritative across queries. CSV response excludes its UTF-8 BOM.",
+  "endpoints": [
+    {
+      "method": "POST",
+      "path": "/api/queries",
+      "status_code": 200,
+      "content_type": "application/json",
+      "response": {
+        "id": 1,
+        "version": 1,
+        "hit_count": 42,
+        "translation": "exercise[Title/Abstract] AND sleep[Title/Abstract]"
+      },
+      "request": {
+        "text": "exercise[tiab] AND sleep[tiab]",
+        "date_from": "2016-01-01",
+        "date_to": "2026-10-27"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/queries",
+      "status_code": 200,
+      "content_type": "application/json",
+      "response": [
+        {
+          "id": 1,
+          "version": 1,
+          "hit_count": 42,
+          "translation": "exercise[Title/Abstract] AND sleep[Title/Abstract]",
+          "project_id": 1,
+          "parent_id": null,
+          "text": "exercise[tiab] AND sleep[tiab]",
+          "date_from": "2016-01-01",
+          "date_to": "2026-10-27",
+          "status": "saved",
+          "counts": {
+            "records": 10,
+            "include": 0,
+            "exclude": 0,
+            "maybe": 10
+          },
+          "created_at": "2026-10-27T08:00:00Z"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/queries/1",
+      "status_code": 200,
+      "content_type": "application/json",
+      "response": {
+        "id": 1,
+        "version": 1,
+        "hit_count": 42,
+        "translation": "exercise[Title/Abstract] AND sleep[Title/Abstract]",
+        "project_id": 1,
+        "parent_id": null,
+        "text": "exercise[tiab] AND sleep[tiab]",
+        "date_from": "2016-01-01",
+        "date_to": "2026-10-27",
+        "status": "saved",
+        "counts": {
+          "records": 10,
+          "include": 0,
+          "exclude": 0,
+          "maybe": 10
+        },
+        "created_at": "2026-10-27T08:00:00Z"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/queries/1/approve",
+      "status_code": 200,
+      "content_type": "application/json",
+      "response": {
+        "id": 1,
+        "status": "approved"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/queries/1/fetch",
+      "status_code": 200,
+      "content_type": "application/json",
+      "response": {
+        "query_id": 1,
+        "run_id": 1,
+        "status": "queued"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/pipeline/run?query_id=1",
+      "status_code": 200,
+      "content_type": "application/json",
+      "response": {
+        "query_id": 1,
+        "run_id": 1,
+        "status": "queued"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/records?query_id=1&label=maybe&show_hidden=false&limit=50&offset=0",
+      "status_code": 200,
+      "content_type": "application/json",
+      "response": {
+        "items": [
+          {
+            "id": 1,
+            "pmid": "DEMO-0001",
+            "doi": "10.0000/demo.1",
+            "title": "Exercise and sleep quality in adults: a fictional trial",
+            "year": 2024,
+            "journal": "Fictional Evidence Journal",
+            "label": "maybe",
+            "reason": "Scaffold stub; screening has not run.",
+            "criterion": "",
+            "source": "machine",
+            "hidden_duplicate": false
+          }
+        ],
+        "total": 1,
+        "limit": 50,
+        "offset": 0
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/records/1?query_id=1",
+      "status_code": 200,
+      "content_type": "application/json",
+      "response": {
+        "id": 1,
+        "pmid": "DEMO-0001",
+        "doi": "10.0000/demo.1",
+        "title": "Exercise and sleep quality in adults: a fictional trial",
+        "year": 2024,
+        "journal": "Fictional Evidence Journal",
+        "label": "maybe",
+        "reason": "Scaffold stub; screening has not run.",
+        "criterion": "",
+        "source": "machine",
+        "hidden_duplicate": false,
+        "abstract": "Adults were assigned to exercise or usual care. Sleep quality was assessed after eight weeks.",
+        "authors": [
+          "Example A",
+          "Sample B"
+        ],
+        "language": "eng",
+        "pub_types": [
+          "Randomized Controlled Trial"
+        ],
+        "mesh": [
+          "Humans",
+          "Adult"
+        ],
+        "literature_source": "pubmed",
+        "fetched_at": "2026-10-27T08:00:00Z",
+        "pico_spans": [],
+        "group": {
+          "id": 1,
+          "representative_record_id": 1,
+          "dedup_version": "dedup-v1",
+          "rule_set_version": "dedup-v1",
+          "run_id": 1,
+          "members": [
+            {
+              "record_id": 1,
+              "match_type": "exact",
+              "score": 1.0,
+              "status": "auto"
+            },
+            {
+              "record_id": 2,
+              "match_type": "exact",
+              "score": 1.0,
+              "status": "auto"
+            }
+          ]
+        },
+        "decisions": [],
+        "query_versions": [
+          {
+            "id": 1,
+            "version": 1,
+            "hit_count": 42,
+            "translation": "exercise[Title/Abstract] AND sleep[Title/Abstract]"
+          }
+        ]
+      },
+      "query_parameters": {
+        "query_id": {
+          "required": false,
+          "type": "positive integer",
+          "description": "Select a linked query context. Omit for the existing latest-context behaviour; unknown queries or unlinked detail records return 404."
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/runs?query_id=1",
+      "status_code": 200,
+      "content_type": "application/json",
+      "response": [
+        {
+          "id": 1,
+          "query_id": 1,
+          "step": "pipeline",
+          "rule_set_version": "pipeline-v1",
+          "status": "queued",
+          "counts": {
+            "records_in": 0
+          },
+          "started_at": "2026-10-27T08:00:00Z",
+          "finished_at": null
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/duplicates",
+      "status_code": 200,
+      "content_type": "application/json",
+      "response": {
+        "groups": [
+          {
+            "id": 1,
+            "representative_record_id": 1,
+            "dedup_version": "dedup-v1",
+            "rule_set_version": "dedup-v1",
+            "run_id": 1,
+            "members": [
+              {
+                "record_id": 1,
+                "match_type": "exact",
+                "score": 1.0,
+                "status": "auto"
+              },
+              {
+                "record_id": 2,
+                "match_type": "exact",
+                "score": 1.0,
+                "status": "auto"
+              }
+            ]
+          }
+        ],
+        "uncertain_pairs": [
+          {
+            "record_ids": [
+              3,
+              4
+            ],
+            "score": 0.9,
+            "match_type": "fuzzy",
+            "status": "pending"
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/decisions",
+      "status_code": 200,
+      "content_type": "application/json",
+      "response": {
+        "id": 1,
+        "entity_type": "record",
+        "entity_id": 1,
+        "action": "set_label",
+        "old_value": {
+          "label": "maybe"
+        },
+        "new_value": {
+          "label": "include"
+        },
+        "note": "Reviewer checked the eligibility criteria.",
+        "actor": "reviewer",
+        "created_at": "2026-10-27T08:00:00Z"
+      },
+      "request": {
+        "entity_type": "record",
+        "entity_id": 1,
+        "action": "set_label",
+        "new_value": {
+          "label": "include"
+        },
+        "note": "Reviewer checked the eligibility criteria."
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/decisions",
+      "status_code": 200,
+      "content_type": "application/json",
+      "response": [
+        {
+          "id": 1,
+          "entity_type": "record",
+          "entity_id": 1,
+          "action": "set_label",
+          "old_value": {
+            "label": "maybe"
+          },
+          "new_value": {
+            "label": "include"
+          },
+          "note": "Reviewer checked the eligibility criteria.",
+          "actor": "reviewer",
+          "created_at": "2026-10-27T08:00:00Z"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/criteria",
+      "status_code": 200,
+      "content_type": "application/json",
+      "response": [
+        {
+          "key": "non_human",
+          "project_id": 1,
+          "label": "Non-human studies",
+          "kind": "exclude",
+          "description": "Exclude animal-only studies.",
+          "reason": "The review concerns humans.",
+          "source": "both",
+          "active": true
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/criteria/non_human",
+      "status_code": 200,
+      "content_type": "application/json",
+      "response": {
+        "key": "non_human",
+        "project_id": 1,
+        "label": "Non-human studies",
+        "kind": "exclude",
+        "description": "Exclude animal-only studies.",
+        "reason": "The review concerns humans.",
+        "source": "both",
+        "active": true
+      },
+      "request": {
+        "active": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/export.csv?query_id=1",
+      "status_code": 200,
+      "content_type": "text/csv",
+      "response": "pmid,doi,title,abstract,year,journal,label,reason\r\n",
+      "query_parameters": {
+        "query_id": {
+          "required": false,
+          "type": "positive integer",
+          "description": "Select a linked query context. Omit for the existing latest-context behaviour; unknown queries or unlinked detail records return 404."
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/health",
+      "status_code": 200,
+      "content_type": "application/json",
+      "response": {
+        "status": "ok"
+      }
+    }
+  ]
+}

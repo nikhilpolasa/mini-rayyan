@@ -90,7 +90,7 @@ npm run dev
 Open the printed Vite URL, normally `http://127.0.0.1:5173`. The exact origin must
 be allowed by backend `CORS_ORIGINS`. Restart Vite after changing its environment.
 If `VITE_API_BASE_URL` is unset, the frontend uses a browser-local mock built from
-`Docs/api-examples.json`. Mock counts/records are fictional and do not verify NCBI
+`docs/api-examples.json`. Mock counts/records are fictional and do not verify NCBI
 access. Backend errors do not silently switch a live workspace to mock data.
 
 Pages cover queries, records with label/version/visibility filters and paging,
@@ -146,7 +146,7 @@ required checkpoint demonstration; do not substitute mock results for it.
 
 ## Five-minute demo and Checkpoint 1
 
-1. State the review question and criteria from [Step 0](Docs/step0.md).
+1. State the review question and criteria from [Step 0](docs/step0.md).
 2. Save v1 and then v2 using the query examples there. Show actual hit counts and
    PubMed translations; inspect v1 to demonstrate unchanged query content.
 3. Approve each version, pull a small set, and poll query/run status. Show an
@@ -160,7 +160,7 @@ required checkpoint demonstration; do not substitute mock results for it.
    show that records and human decisions remain. Toggle a criterion, rerun and
    inspect the new machine version. Demonstrate undo as another audit entry.
 6. Download effective visible Includes as CSV, inspect the decision log, and
-   explain the two query-change cases in the [one-page loop design](Docs/loop-design.md).
+   explain the two query-change cases in the [one-page loop design](docs/loop-design.md).
 
 Checkpoint 1 requires the written question/criteria, one-page loop design,
 database design and a successful small **live** run of steps 1-3. The code and

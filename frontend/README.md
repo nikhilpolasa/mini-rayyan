@@ -10,7 +10,7 @@ npm run dev
 ```
 
 Open the Vite URL (normally `http://127.0.0.1:5173`). Default mode uses a copied
-snapshot of `../Docs/api-examples.json` in `src/mocks/api-examples.json`; no backend
+snapshot of `../docs/api-examples.json` in `src/mocks/api-examples.json`; no backend
 or external request is needed. Demo changes persist in sessionStorage within the
 current browser tab. Missing metadata for IDs referenced by duplicate examples
 is labeled explicitly. Mock hit counts are examples, not real search results.
@@ -46,7 +46,7 @@ npm run preview
 To refresh mock fixtures after an API example update (PowerShell):
 
 ```powershell
-Copy-Item ../Docs/api-examples.json src/mocks/api-examples.json
+Copy-Item ../docs/api-examples.json src/mocks/api-examples.json
 ```
 
 Only frontend files are part of this implementation.

@@ -55,7 +55,8 @@ cd frontend && npm install && npm run dev
 mini-rayyan/
   AGENTS.md
   .env.example
-  docs/               PRD.md, api-examples.json, step0.md, loop-design.md   (Nikhil)
+  docs/               PRD.md, api-examples.json, step0.md, loop-design.md,
+                      design-decisions.md                                  (Nikhil)
   scripts/            reset_db.py, seed_demo.py                              (Karthikeya)
   fixtures/           sample abstracts, synthetic duplicates, labels         (NLP teammate)
   backend/
@@ -73,6 +74,8 @@ mini-rayyan/
 
 If your task needs a change in a file you do not own, stop and describe the change needed instead of editing it.
 
+The canonical documentation folder is `docs/` (lowercase). Keep filesystem names and references consistent on case-sensitive hosts.
+
 ## 5. Data model (summary)
 
 Tables: `queries`, `records`, `query_records`, `dup_groups`, `group_members`, `criteria`, `screen_results`, `pico_spans`, `decisions`, `run_log`. Column details are in `docs/PRD.md` section 7.
@@ -84,6 +87,7 @@ Constraints that must exist:
 - `screen_results` UNIQUE (`record_id`, `rule_set_version`).
 - All timestamps in UTC.
 - Level 1 has one implicit project (`project_id = 1`); keep the column.
+- Level 1 has one shared workspace per configured database. Independent in-app workspaces are out of scope. Separate reviews use separate `DATABASE_URL` values or SQLite files and operator-managed instances/restarts, with no schema change. A shared judge URL does not isolate concurrent judges.
 
 ## 6. Pipeline behaviour
 
@@ -93,6 +97,7 @@ Order: **fetch, dedup, screen, PICO.** `services/pipeline.py` runs these for a q
 - **Dedup (DD1 to DD7):** exact DOI or PMID first, then fuzzy. Details in section 9. One representative per group; the others are hidden, not deleted. Rerunnable on the full stored set.
 - **Screen (S1 to S5):** only non-hidden records. Rerun only for new or changed records. Never touch human decisions.
 - **PICO (P1 to P5):** only Include (and optionally Maybe). Offsets against the exact stored abstract string.
+- After a human record Include is saved and committed, run record-only PICO immediately in a separate session/transaction. Never mix machine writes into the decision transaction; a tagging failure is logged and leaves the decision committed.
 - Log every run in `run_log` (query id, step, rule_set_version, status, counts, start and finish times).
 - Keep the pipeline deterministic (N1): same input, same output.
 - Record counts and durations per step in `run_log.counts_json` (records in, auto-excluded, groups formed, uncertain pairs, seconds taken). Human overrides go in `decisions`. The report needs these numbers (PRD section 20).
@@ -131,15 +136,17 @@ GET  /api/queries                 GET /api/queries/{id}
 POST /api/queries/{id}/approve    POST /api/queries/{id}/fetch
 POST /api/pipeline/run?query_id=
 GET  /api/records?query_id=&label=&show_hidden=&limit=&offset=
-GET  /api/records/{id}            GET /api/runs?query_id=
+GET  /api/records/{id}[?query_id=] GET /api/runs?query_id=
 GET  /api/duplicates
 POST /api/decisions               {entity_type, entity_id, action, new_value, note}
 GET  /api/decisions
 GET  /api/criteria                PATCH /api/criteria/{key}
-GET  /api/export.csv              GET /api/health
+GET  /api/export.csv[?query_id=]   GET /api/health
 ```
 
 Example payloads live in `docs/api-examples.json`. Keep them in sync when the API changes. The frontend mocks from this file.
+
+The optional `query_id` on record detail and export is the approved minimal CC7 change: select that query's machine context; omission preserves latest-context behaviour. No run selector, workspace API or table change is approved by CC7.
 
 ## 8. PubMed rules (E-utilities)
 
@@ -167,6 +174,7 @@ Example payloads live in `docs/api-examples.json`. Keep them in sync when the AP
 3. Score 0.95 or more with matching year and author: auto-group. Score 0.85 to 0.95: uncertain pair for human review. Below 0.85: no match.
 4. A journal paper and its conference version are not duplicates. If titles match but publication type or journal suggests a conference version, or years differ by more than 1, do not auto-merge.
 5. Thresholds are constants in one place so they can be tuned and reported.
+6. The approved F7 guard blocks fuzzy auto-merge for title prefixes Erratum, Correction, Comment on and Reply to, or publication types Published Erratum, Comment and Retraction of Publication. Keep otherwise fuzzy candidates in the uncertain queue; shared PMID/DOI still gives an exact match. Do not force unrelated below-threshold titles into the queue.
 
 **Screening (`screening.py`)**
 - `non_human`: MeSH has "Animals" without "Humans". Fallback keywords: rat, rats, mice, mouse, murine, in vitro, zebrafish. New records may lack MeSH, so the fallback matters.
@@ -176,6 +184,7 @@ Example payloads live in `docs/api-examples.json`. Keep them in sync when the AP
 - `no_abstract`: label Maybe, reason "no abstract".
 - **Include vs Maybe (S6):** if no exclusion matches, use `record["query_groups"]` (the active query split on top-level AND). Every group has a term in title or abstract: Include, reason "matches all query concepts". Only some groups match: Maybe, reason names the missing group. Never use hardcoded topic words for this.
 - Respect `active_criteria`. Return the first matching exclusion's reason and criterion key. Explain the reason in plain words ("MeSH Animals without Humans").
+- No age exclusion is approved. Child-only or unclear age is Maybe for manual review. The baseline has no dedicated age classifier; do not claim automatic age routing has been tested.
 - Report in the README which criteria use metadata and which use an algorithm.
 
 **PICO (`pico.py`)**
@@ -203,6 +212,8 @@ Level 1 must not block these (see PRD section 11):
 - An excluded record found again keeps its status and gains only a new `query_records` link.
 - Two records judged differently that become duplicates mark the group as **conflict** for the reviewer; never choose silently.
 - Diff view, exact revert and run log are bonus items. Do not build them until Level 1 is tagged `v1.0`.
+
+Current scope decisions are recorded in `docs/design-decisions.md`: no E7 in-app workspaces for Level 1; CC3 (multiple languages), CC4 (section metadata), CC5 (historical snapshots) and CC6 (fetch manifests) are deferred until after `v1.0`. CC1 is minimal warning display only after blocker fixes, with no broad diagnostics/schema project. Existing run logs remain supported; their presence does not establish exact historical replay.
 
 ## 12. Testing and definition of done
 
