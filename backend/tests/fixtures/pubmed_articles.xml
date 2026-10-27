@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic metadata and abstracts, shaped like EFetch XML; no copyrighted text. -->
+<!DOCTYPE PubmedArticleSet SYSTEM "https://dtd.nlm.nih.gov/ncbi/pubmed/out/pubmed_250101.dtd">
+<PubmedArticleSet>
+  <PubmedArticle>
+    <MedlineCitation>
+      <PMID Version="1">100001</PMID>
+      <Article>
+        <Journal><JournalIssue><PubDate><Year>2024</Year><Month>Jan</Month></PubDate></JournalIssue><Title>Fictional Trials Journal</Title></Journal>
+        <ArticleTitle>Exercise with <i>guided</i> practice and H<sub>2</sub>O.</ArticleTitle>
+        <Abstract>
+          <AbstractText Label="BACKGROUND">Adults with <i>sleep</i> difficulties were enrolled.</AbstractText>
+          <AbstractText Label="METHODS">We compared walking &amp; usual care.</AbstractText>
+          <AbstractText Label="RESULTS">Mean score changed by 2<sup>2</sup> points.</AbstractText>
+        </Abstract>
+        <AuthorList>
+          <Author><LastName>García</LastName><ForeName>Ana</ForeName><Initials>A</Initials></Author>
+          <Author><CollectiveName>Example <i>Study</i> Group</CollectiveName></Author>
+          <Author><LastName>Lee</LastName><Initials>JK</Initials><Suffix>Jr</Suffix></Author>
+          <Author><ForeName>Mononym</ForeName></Author>
+          <Author/>
+        </AuthorList>
+        <Language>eng</Language>
+        <PublicationTypeList><PublicationType UI="D016449">Randomized Controlled Trial</PublicationType><PublicationType>Journal Article</PublicationType></PublicationTypeList>
+      </Article>
+      <MeshHeadingList>
+        <MeshHeading><DescriptorName UI="D006801">Humans</DescriptorName><QualifierName>physiology</QualifierName></MeshHeading>
+        <MeshHeading><DescriptorName>Adult</DescriptorName></MeshHeading>
+      </MeshHeadingList>
+    </MedlineCitation>
+    <PubmedData><ArticleIdList><ArticleId IdType="pubmed">100001</ArticleId><ArticleId IdType="doi"> 10.0000/example.1 </ArticleId><ArticleId IdType="pmc">PMC100001</ArticleId></ArticleIdList></PubmedData>
+  </PubmedArticle>
+  <PubmedArticle>
+    <MedlineCitation><PMID>100002</PMID><Article>
+      <Journal><JournalIssue><PubDate><MedlineDate>2021 Dec-2022 Jan</MedlineDate></PubDate></JournalIssue><ISOAbbreviation>Fict J</ISOAbbreviation></Journal>
+      <ArticleTitle>非英語の架空研究</ArticleTitle>
+      <Language>jpn</Language>
+    </Article></MedlineCitation>
+  </PubmedArticle>
+  <PubmedArticle>
+    <MedlineCitation><PMID>100003</PMID><Article>
+      <Journal><JournalIssue><PubDate><Year>unknown</Year><MedlineDate>2018 Winter</MedlineDate></PubDate></JournalIssue></Journal>
+      <ArticleTitle/><Abstract><AbstractText/><AbstractText> </AbstractText></Abstract>
+    </Article></MedlineCitation>
+  </PubmedArticle>
+  <PubmedArticle>
+    <MedlineCitation><PMID>100004</PMID><Article>
+      <Journal><JournalIssue><PubDate><MedlineDate>Undated</MedlineDate></PubDate></JournalIssue></Journal>
+      <ArticleTitle>Missing year</ArticleTitle>
+      <Abstract><AbstractText>One unstructured abstract.</AbstractText></Abstract>
+    </Article></MedlineCitation>
+  </PubmedArticle>
+  <PubmedArticle><MedlineCitation><PMID>100005</PMID><Article/></MedlineCitation></PubmedArticle>
+  <PubmedArticle><MedlineCitation><Article><ArticleTitle>No PMID: skipped</ArticleTitle></Article></MedlineCitation></PubmedArticle>
+  <PubmedArticle><MedlineCitation><PMID>100006</PMID></MedlineCitation></PubmedArticle>
+  <PubmedArticle/>
+  <PubmedBookArticle><BookDocument><PMID>900001</PMID><ArticleTitle>A book entry: skipped</ArticleTitle></BookDocument></PubmedBookArticle>
+</PubmedArticleSet>
