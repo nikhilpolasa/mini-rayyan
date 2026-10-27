@@ -2,7 +2,7 @@
 
 import csv
 import io
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, Query, Response
 from .. import models as m
 from ._common import DB, record_summaries
 
@@ -14,7 +14,7 @@ router = APIRouter(tags=["export"])
     response_class=Response,
     responses={200: {"content": {"text/csv": {}}}},
 )
-def export_csv(db: DB):
+def export_csv(db: DB, query_id: int | None = Query(default=None, gt=0)):
     output = io.StringIO(newline="")
     writer = csv.DictWriter(
         output,
@@ -30,7 +30,7 @@ def export_csv(db: DB):
         ],
     )
     writer.writeheader()
-    for row in record_summaries(db, label="include"):
+    for row in record_summaries(db, query_id=query_id, label="include"):
         record = db.get(m.Record, row["id"])
         writer.writerow(
             {

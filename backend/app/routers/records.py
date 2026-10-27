@@ -26,5 +26,5 @@ def list_records(
 
 
 @router.get("/{id}", response_model=s.RecordDetail)
-def get_record(id: int, db: DB):
-    return record_detail(db, require(db, m.Record, id))
+def get_record(id: int, db: DB, query_id: int | None = Query(default=None, gt=0)):
+    return record_detail(db, require(db, m.Record, id), query_id)

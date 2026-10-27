@@ -139,6 +139,11 @@ export async function mockRequest<T>(path: string, method = 'GET', body?: unknow
   const url = new URL(path, 'http://mock.local');
   const parts = url.pathname.split('/').filter(Boolean);
   const resource = parts[1], id = Number(parts[2]);
+  const queryId = url.searchParams.get('query_id');
+  if (queryId && ['records', 'export.csv'].includes(resource)) {
+    requireItem(state.queries, query => query.id === Number(queryId), 'Query');
+    if (resource === 'records' && parts[2] && !state.links[queryId]?.includes(id)) throw new Error('Record not found in this query');
+  }
   let result: unknown;
   if (resource === 'health') result = { status: 'ok' };
   else if (resource === 'queries') {
@@ -175,9 +180,9 @@ export async function mockRequest<T>(path: string, method = 'GET', body?: unknow
     } else result = state.criteria;
   } else if (resource === 'export.csv') {
     const fields = ['pmid', 'doi', 'title', 'abstract', 'year', 'journal', 'label', 'reason'] as const;
-    const rows = state.records.map(recordView).filter(record => record.label === 'include' && !record.hidden_duplicate);
+    const rows = state.records.map(recordView).filter(record => record.label === 'include' && !record.hidden_duplicate && (!queryId || state.links[queryId]?.includes(record.id)));
     const quote = (value: unknown) => `"${String(value ?? '').replaceAll('"', '""')}"`;
-    const header = String(examples.endpoints.find(item => item.path === '/api/export.csv')!.response);
+    const header = String(examples.endpoints.find(item => item.path.split('?')[0] === '/api/export.csv')!.response);
     return new Blob(['\ufeff', header, ...rows.map(row => fields.map(field => quote(row[field])).join(',') + '\r\n')], { type: 'text/csv;charset=utf-8' }) as T;
   } else throw new Error(`Mock endpoint not found: ${method} ${path}`);
   persist(); signal?.throwIfAborted(); return structuredClone(result) as T;

@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, isMockMode } from './api';
-import { Badge, Empty, Feedback, Icon, LoadState, PageHeading, PicoAbstract, dateText, picoLabels, useAction } from './components';
+import { Badge, Empty, Feedback, Icon, LoadState, PageHeading, PicoAbstract, dateText, picoLabels, useAction, useQueryContext, queryLink } from './components';
 import type { DecisionInput, Label, PicoSpan, QueryInput, QueryVersion } from './types';
 
 export function QueriesPage() {
@@ -54,15 +54,16 @@ export function QueriesPage() {
 }
 
 export function RecordsPage() {
-  const [queryId, setQueryId] = useState(''), [label, setLabel] = useState(''), [hidden, setHidden] = useState(false), [limit, setLimit] = useState(25), [offset, setOffset] = useState(0);
+  const queryId = useQueryContext();
+  const [label, setLabel] = useState(''), [hidden, setHidden] = useState(false), [limit, setLimit] = useState(25), [offset, setOffset] = useState(0);
   const queries = useQuery({ queryKey: ['queries'], queryFn: ({ signal }) => api.queries(signal) });
-  const filters = { query_id: queryId ? Number(queryId) : undefined, label: label ? label as Label : undefined, show_hidden: hidden, limit, offset };
+  const filters = { query_id: queryId, label: label ? label as Label : undefined, show_hidden: hidden, limit, offset };
   const records = useQuery({ queryKey: ['records', filters], queryFn: ({ signal }) => api.records(filters, signal), refetchInterval: 5000 });
   function filter(action: () => void) { action(); setOffset(0); }
   return <><PageHeading eyebrow="02 / SCREEN & REVIEW" title="Every record deserves a clear decision.">Read the evidence, understand the reason, and keep the final say.</PageHeading>
-    <section className="panel"><div className="filter-bar"><div><label htmlFor="version-filter">Query version</label><select id="version-filter" value={queryId} onChange={event => filter(() => setQueryId(event.target.value))}><option value="">All query versions</option>{queries.data?.map(query => <option key={query.id} value={query.id}>Version {query.version} · {query.text.slice(0, 38)}</option>)}</select></div><div><label htmlFor="label-filter">Screening label</label><select id="label-filter" value={label} onChange={event => filter(() => setLabel(event.target.value))}><option value="">All labels</option><option value="include">Include</option><option value="exclude">Exclude</option><option value="maybe">Maybe</option></select></div><label className="check-label"><input type="checkbox" checked={hidden} onChange={event => filter(() => setHidden(event.target.checked))}/> Show hidden duplicates</label></div>
+    <section className="panel"><div className="filter-bar"><div><label htmlFor="version-filter">Query version</label><select id="version-filter" value={queryId ?? ''} onChange={event => filter(() => { window.location.hash = queryLink('/records', event.target.value ? Number(event.target.value) : undefined); })}><option value="">All query versions</option>{queries.data?.map(query => <option key={query.id} value={query.id}>Version {query.version} · {query.text.slice(0, 38)}</option>)}</select></div><div><label htmlFor="label-filter">Screening label</label><select id="label-filter" value={label} onChange={event => filter(() => setLabel(event.target.value))}><option value="">All labels</option><option value="include">Include</option><option value="exclude">Exclude</option><option value="maybe">Maybe</option></select></div><label className="check-label"><input type="checkbox" checked={hidden} onChange={event => filter(() => setHidden(event.target.checked))}/> Show hidden duplicates</label></div>
       <LoadState pending={records.isPending} error={records.error ?? queries.error} retry={() => { void records.refetch(); void queries.refetch(); }}/>
-      {records.data && <><div className="table-caption"><strong>{records.data.total} matching records</strong><span>Labels reflect the latest human override.</span></div><div className="table-scroll"><table><thead><tr><th>STUDY</th><th>SCREENING</th><th>REASON & SOURCE</th><th><span className="sr-only">Open record</span></th></tr></thead><tbody>{records.data.items.map(record => <tr key={record.id} className={record.hidden_duplicate ? 'hidden-record' : ''}><td><a className="record-title" href={`#/records/${record.id}`}>{record.title || 'Untitled record'}</a><div className="record-meta">{record.journal ?? 'Journal unavailable'} · {record.year ?? 'Year unavailable'}<br/><span>PMID {record.pmid}</span>{record.hidden_duplicate && <span className="hidden-pill">Hidden duplicate</span>}</div></td><td><Badge label={record.label}/></td><td><p className="reason-text">{record.reason || 'No reason supplied.'}</p><span className={`source source-${record.source}`}>{record.source === 'human' ? 'Reviewer override' : 'Machine result'}</span>{record.criterion && <small className="criterion-key">{record.criterion}</small>}</td><td><a className="row-open" href={`#/records/${record.id}`} aria-label={`Review ${record.title}`}><Icon name="arrow"/></a></td></tr>)}</tbody></table></div>
+      {records.data && <><div className="table-caption"><strong>{records.data.total} matching records</strong><span>Labels reflect the latest human override.</span></div><div className="table-scroll"><table><thead><tr><th>STUDY</th><th>SCREENING</th><th>REASON & SOURCE</th><th><span className="sr-only">Open record</span></th></tr></thead><tbody>{records.data.items.map(record => <tr key={record.id} className={record.hidden_duplicate ? 'hidden-record' : ''}><td><a className="record-title" href={queryLink(`/records/${record.id}`, queryId)}>{record.title || 'Untitled record'}</a><div className="record-meta">{record.journal ?? 'Journal unavailable'} · {record.year ?? 'Year unavailable'}<br/><span>PMID {record.pmid}</span>{record.hidden_duplicate && <span className="hidden-pill">Hidden duplicate</span>}</div></td><td><Badge label={record.label}/></td><td><p className="reason-text">{record.reason || 'No reason supplied.'}</p><span className={`source source-${record.source}`}>{record.source === 'human' ? 'Reviewer override' : 'Machine result'}</span>{record.criterion && <small className="criterion-key">{record.criterion}</small>}</td><td><a className="row-open" href={queryLink(`/records/${record.id}`, queryId)} aria-label={`Review ${record.title}`}><Icon name="arrow"/></a></td></tr>)}</tbody></table></div>
         {!records.data.items.length && <Empty title="No records match these filters">Try another label or query version, or show hidden duplicates.</Empty>}
         <div className="pagination"><span>{records.data.total ? `${offset + 1}–${Math.min(offset + limit, records.data.total)}` : '0'} of {records.data.total}</span><div><label htmlFor="page-size">Per page</label><select id="page-size" value={limit} onChange={event => filter(() => setLimit(Number(event.target.value)))}>{[10, 25, 50, 100].map(size => <option key={size} value={size}>{size}</option>)}</select><button className="btn btn-small" disabled={offset === 0 || records.isFetching} onClick={() => setOffset(Math.max(0, offset - limit))}>Previous</button><button className="btn btn-small" disabled={offset + limit >= records.data.total || records.isFetching} onClick={() => setOffset(offset + limit)}>Next</button></div></div>
       </>}
@@ -70,7 +71,8 @@ export function RecordsPage() {
 }
 
 export function RecordPageView({ id }: { id: number }) {
-  const record = useQuery({ queryKey: ['record', id], queryFn: ({ signal }) => api.record(id, signal) });
+  const queryId = useQueryContext();
+  const record = useQuery({ queryKey: ['record', id, queryId ?? null], queryFn: ({ signal }) => api.record(id, signal, queryId) });
   const action = useAction(api.decide);
   const [note, setNote] = useState('');
   const [tag, setTag] = useState<{ label: PicoSpan['label']; start: number; end: number }>({ label: 'P', start: 0, end: 6 });
@@ -79,7 +81,7 @@ export function RecordPageView({ id }: { id: number }) {
   const tagValid = Number.isInteger(tag.start) && Number.isInteger(tag.end) && tag.start >= 0 && tag.end > tag.start && tag.end <= chars.length;
   const latest = data?.decisions.some(decision => decision.entity_type === 'record' && String(decision.entity_id) === String(id));
   function decide(input: DecisionInput) { action.mutate(input, { onSuccess: () => setNote('') }); }
-  return <><a className="back-link" href="#/records">← Back to records</a><LoadState pending={record.isPending} error={record.error} retry={record.refetch}/>
+  return <><a className="back-link" href={queryLink('/records', queryId)}>← Back to records</a><LoadState pending={record.isPending} error={record.error} retry={record.refetch}/>
     {data && <><PageHeading eyebrow={`RECORD ${data.id} / PMID ${data.pmid}`} title={data.title || 'Untitled record'}>{data.authors.join(', ') || 'Authors unavailable'} · {data.journal ?? 'Journal unavailable'} · {data.year ?? 'Year unavailable'}</PageHeading>
       <div className="detail-layout"><div><section className="panel abstract-panel"><div className="section-heading compact"><h2>Abstract</h2><div className="pico-legend">{Object.entries(picoLabels).map(([key, value]) => <span key={key}><i className={`pico-${key}`}/>{value}</span>)}</div></div>{data.abstract ? <PicoAbstract text={data.abstract} spans={data.pico_spans}/> : <Empty title="No abstract available">Review the available metadata before making a decision.</Empty>}
         <div className="metadata-row"><span>Language: {data.language ?? 'Unknown'}</span><span>{data.pub_types.join(' · ') || 'Publication type unavailable'}</span></div>
@@ -126,10 +128,11 @@ export function CriteriaPage() {
 }
 
 export function ExportPage() {
-  const included = useQuery({ queryKey: ['records', 'export-preview'], queryFn: ({ signal }) => api.records({ label: 'include', limit: 1 }, signal) });
+  const queryId = useQueryContext();
+  const included = useQuery({ queryKey: ['records', 'export-preview', queryId ?? null], queryFn: ({ signal }) => api.records({ query_id: queryId, label: 'include', limit: 1 }, signal) });
   const [downloaded, setDownloaded] = useState(false);
   const download = useAction(async () => {
-    const blob = await api.exportCsv();
+    const blob = await api.exportCsv(queryId);
     const url = URL.createObjectURL(blob), anchor = document.createElement('a');
     anchor.href = url; anchor.download = 'included-studies.csv'; document.body.append(anchor); anchor.click(); anchor.remove();
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);

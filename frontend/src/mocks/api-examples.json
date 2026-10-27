@@ -1,5 +1,5 @@
 {
-  "description": "Illustrative API contracts; responses use persisted state. Writes and jobs are implemented. Screening, PICO and pair scoring remain service stubs. CSV response excludes its UTF-8 BOM.",
+  "description": "Illustrative persisted API contracts. Optional query_id on record detail and CSV selects that query's machine context; omitted selectors retain latest-context behaviour. Human decisions remain authoritative across queries. CSV response excludes its UTF-8 BOM.",
   "endpoints": [
     {
       "method": "POST",
@@ -130,7 +130,7 @@
     },
     {
       "method": "GET",
-      "path": "/api/records/1",
+      "path": "/api/records/1?query_id=1",
       "status_code": 200,
       "content_type": "application/json",
       "response": {
@@ -191,6 +191,13 @@
             "translation": "exercise[Title/Abstract] AND sleep[Title/Abstract]"
           }
         ]
+      },
+      "query_parameters": {
+        "query_id": {
+          "required": false,
+          "type": "positive integer",
+          "description": "Select a linked query context. Omit for the existing latest-context behaviour; unknown queries or unlinked detail records return 404."
+        }
       }
     },
     {
@@ -347,10 +354,17 @@
     },
     {
       "method": "GET",
-      "path": "/api/export.csv",
+      "path": "/api/export.csv?query_id=1",
       "status_code": 200,
       "content_type": "text/csv",
-      "response": "pmid,doi,title,abstract,year,journal,label,reason\r\n"
+      "response": "pmid,doi,title,abstract,year,journal,label,reason\r\n",
+      "query_parameters": {
+        "query_id": {
+          "required": false,
+          "type": "positive integer",
+          "description": "Select a linked query context. Omit for the existing latest-context behaviour; unknown queries or unlinked detail records return 404."
+        }
+      }
     },
     {
       "method": "GET",

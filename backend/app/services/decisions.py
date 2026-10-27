@@ -14,9 +14,11 @@ def columns(row) -> dict:
     return {column.key: getattr(row, column.key) for column in row.__table__.columns}
 
 
-def selected_version(session: Session, record_id: int, step: str) -> str | None:
+def selected_version(
+    session: Session, record_id: int, step: str, query_id: int | None = None
+) -> str | None:
     """Select the latest completed processing version for a record's queries."""
-    context = session.scalar(
+    statement = (
         select(m.RunLog.rule_set_version)
         .join(m.QueryRecord, m.QueryRecord.query_id == m.RunLog.query_id)
         .where(
@@ -27,6 +29,9 @@ def selected_version(session: Session, record_id: int, step: str) -> str | None:
         .order_by(m.RunLog.id.desc())
         .limit(1)
     )
+    if query_id is not None:
+        statement = statement.where(m.RunLog.query_id == query_id)
+    context = session.scalar(statement)
     if context and step in {"screen", "pico"}:
         from .pipeline import _record_version
 
@@ -52,6 +57,7 @@ def effective_status(
     group_ids: set | None = None,
     version: str | None = None,
     peer_ids: set | None = None,
+    query_id: int | None = None,
 ) -> dict:
     """Prefer the latest human label, otherwise the selected machine result."""
     human = list(
@@ -93,7 +99,9 @@ def effective_status(
                 "criterion": decision.new_value.get("criterion", ""),
                 "source": "human",
             }
-    version = version or selected_version(session, record_id, "screen")
+    version = version or selected_version(session, record_id, "screen", query_id)
+    if query_id is not None and version is None:
+        version = "unprocessed-query"
     statement = select(m.ScreenResult).where(m.ScreenResult.record_id == record_id)
     if version:
         statement = statement.where(m.ScreenResult.rule_set_version == version)
@@ -106,9 +114,13 @@ def effective_status(
     }
 
 
-def effective_spans(session: Session, record_id: int) -> list[dict]:
+def effective_spans(
+    session: Session, record_id: int, query_id: int | None = None
+) -> list[dict]:
     """Overlay human span edits/removals without modifying original spans."""
-    version = selected_version(session, record_id, "pico")
+    version = selected_version(session, record_id, "pico", query_id)
+    if query_id is not None and version is None:
+        version = "unprocessed-query"
     statement = select(m.PicoSpan).where(
         m.PicoSpan.record_id == record_id, m.PicoSpan.source == "machine"
     )

@@ -25,7 +25,7 @@ async function request<T>(path: string, method = 'GET', body?: unknown, signal?:
     const detail = payload?.detail;
     throw new ApiError(typeof detail === 'string' ? detail : Array.isArray(detail) ? detail.map(item => item.msg).join('; ') : `Request failed (${response.status}).`, response.status);
   }
-  if (path === '/api/export.csv') return await response.blob() as T;
+  if (path.split('?')[0] === '/api/export.csv') return await response.blob() as T;
   return await response.json() as T;
 }
 
@@ -43,12 +43,12 @@ export const api = {
     Object.entries(filters).forEach(([key, value]) => { if (value !== undefined) params.set(key, String(value)); });
     return request<RecordPage>(`/api/records?${params}`, 'GET', undefined, signal);
   },
-  record: (id: number, signal?: AbortSignal) => request<RecordDetail>(`/api/records/${id}`, 'GET', undefined, signal),
+  record: (id: number, signal?: AbortSignal, queryId?: number) => request<RecordDetail>(`/api/records/${id}${queryId === undefined ? '' : `?query_id=${queryId}`}`, 'GET', undefined, signal),
   runs: (queryId?: number, signal?: AbortSignal) => request<Run[]>(`/api/runs${queryId ? `?query_id=${queryId}` : ''}`, 'GET', undefined, signal),
   duplicates: (signal?: AbortSignal) => request<Duplicates>('/api/duplicates', 'GET', undefined, signal),
   decide: (input: DecisionInput) => request<Decision>('/api/decisions', 'POST', input),
   decisions: (signal?: AbortSignal) => request<Decision[]>('/api/decisions', 'GET', undefined, signal),
   criteria: (signal?: AbortSignal) => request<Criterion[]>('/api/criteria', 'GET', undefined, signal),
   toggleCriterion: (key: string, active: boolean) => request<Criterion>(`/api/criteria/${encodeURIComponent(key)}`, 'PATCH', { active }),
-  exportCsv: () => request<Blob>('/api/export.csv'),
+  exportCsv: (queryId?: number) => request<Blob>(`/api/export.csv${queryId === undefined ? '' : `?query_id=${queryId}`}`),
 };

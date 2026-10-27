@@ -61,3 +61,8 @@ export function PicoAbstract({ text, spans }: { text: string; spans: PicoSpan[] 
 export function dateText(value: string) { return new Date(value).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }); }
 const subscribe = (callback: () => void) => { window.addEventListener('hashchange', callback); return () => window.removeEventListener('hashchange', callback); };
 export function useRoute() { return useSyncExternalStore(subscribe, () => window.location.hash.slice(1) || '/queries'); }
+export function useQueryContext() {
+  const query = new URLSearchParams(useRoute().split('?')[1]).get('query_id');
+  return query && /^[1-9]\d*$/.test(query) ? Number(query) : undefined;
+}
+export function queryLink(path: string, queryId?: number) { return `#${path}${queryId === undefined ? '' : `?query_id=${queryId}`}`; }

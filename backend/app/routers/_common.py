@@ -45,6 +45,7 @@ def record_summaries(session, query_id=None, show_hidden=False, label=None):
             record.id,
             state["membership"].get(record.id),
             peer_ids=state["peers"].get(record.id),
+            query_id=query_id,
         )
         if label and status["label"] != label:
             continue
@@ -73,10 +74,14 @@ def query_detail(session, query):
     return decisions.columns(query) | query_created(query) | {"counts": counts}
 
 
-def record_detail(session, record):
+def record_detail(session, record, query_id=None):
+    if query_id is not None:
+        require(session, m.Query, query_id)
+        if session.get(m.QueryRecord, (query_id, record.id)) is None:
+            raise HTTPException(404, "Record not found in this query")
     summary = next(
         row
-        for row in record_summaries(session, show_hidden=True)
+        for row in record_summaries(session, query_id=query_id, show_hidden=True)
         if row["id"] == record.id
     )
     state = dedup.state(session)
@@ -115,7 +120,7 @@ def record_detail(session, record):
         "mesh": record.mesh_json,
         "literature_source": record.source,
         "fetched_at": record.fetched_at,
-        "pico_spans": decisions.effective_spans(session, record.id),
+        "pico_spans": decisions.effective_spans(session, record.id, query_id),
         "group": group,
         "decisions": audit,
         "query_versions": [query_created(query) for query in queries],

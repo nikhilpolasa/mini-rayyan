@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, isMockMode } from './api';
-import { Icon, useRoute } from './components';
+import { Icon, useRoute, useQueryContext, queryLink } from './components';
 import { QueriesPage, RecordsPage, RecordPageView, DuplicatesPage, CriteriaPage, ExportPage, DecisionsPage } from './pages';
 
 const links = [
@@ -14,7 +14,8 @@ const links = [
 ];
 
 export default function App() {
-  const route = useRoute();
+  const route = useRoute().split('?')[0];
+  const queryId = useQueryContext();
   const queryClient = useQueryClient();
   const runs = useQuery({ queryKey: ['runs'], queryFn: ({ signal }) => api.runs(undefined, signal), refetchInterval: query => query.state.data?.some(run => ['queued', 'running'].includes(run.status)) ? 1200 : false });
   const finishedJobs = runs.data?.filter(run => ['completed', 'failed'].includes(run.status)).map(run => `${run.id}:${run.status}`).join(',');
@@ -29,7 +30,7 @@ export default function App() {
     <aside className="sidebar">
       <a className="brand" href="#/queries" aria-label="Mini-Rayyan home"><span className="brand-symbol"><Icon name="leaf" size={24}/></span><span>mini<span className="brand-light">rayyan</span><small>EVIDENCE, WITH CLARITY</small></span></a>
       <div className="workspace-label">YOUR WORKSPACE <span>01</span></div>
-      <nav aria-label="Main navigation">{links.map(link => <a key={link.path} href={`#${link.path}`} className={`nav-link ${active?.path === link.path ? 'active' : ''}`} aria-current={active?.path === link.path ? 'page' : undefined}><Icon name={link.icon}/><span>{link.label}</span>{active?.path === link.path && <span className="nav-dot"/>}</a>)}</nav>
+      <nav aria-label="Main navigation">{links.map(link => <a key={link.path} href={queryLink(link.path, queryId)} className={`nav-link ${active?.path === link.path ? 'active' : ''}`} aria-current={active?.path === link.path ? 'page' : undefined}><Icon name={link.icon}/><span>{link.label}</span>{active?.path === link.path && <span className="nav-dot"/>}</a>)}</nav>
       <div className="sidebar-bottom"><div className="reviewer-avatar">R</div><div><strong>Review workspace</strong><small>Every decision stays yours.</small></div></div>
     </aside>
     <div className="workspace-main">
