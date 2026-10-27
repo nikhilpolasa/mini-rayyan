@@ -9,7 +9,7 @@ from .. import models as m
 from . import matching
 from .matching import AUTO_THRESHOLD, UNCERTAIN_THRESHOLD as PENDING_THRESHOLD
 
-DEDUP_VERSION = "dedup-v2"
+DEDUP_VERSION = "dedup-v3"
 
 
 def record_dict(record: m.Record) -> dict:

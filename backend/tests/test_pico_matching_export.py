@@ -474,7 +474,7 @@ def test_new_pipeline_versions_replace_cached_stub_outputs_without_losing_humans
         )
         assert any(run["rule_set_version"].startswith("screen-v2-") for run in logs)
         assert any(run["rule_set_version"].startswith("pico-v2-") for run in logs)
-        assert any(run["rule_set_version"].startswith("dedup-v2-") for run in logs)
+        assert any(run["rule_set_version"].startswith("dedup-v3-") for run in logs)
         assert client.get("/api/records/1").json()["label"] == "include"
         assert client.get("/api/records/2").json()["hidden_duplicate"] is True
         assert client.get("/api/records/3").json()["label"] == "exclude"

@@ -17,6 +17,12 @@ MAX_YEAR_DIFFERENCE = 1
 CONFERENCE_PATTERN = re.compile(
     r"\b(?:conference|congress(?:es)?|proceedings|meeting abstracts?)\b", re.I
 )
+RELATED_REPORT_TITLE = re.compile(
+    r"^\s*(?:erratum|correction|comment\s+on|reply\s+to)\b", re.I
+)
+RELATED_REPORT_TYPES = frozenset(
+    {"published erratum", "comment", "retraction of publication"}
+)
 
 
 def normalize_title(title: str) -> str:
@@ -82,6 +88,16 @@ def _conference(record: dict) -> bool:
     )
 
 
+def _related_report(record: dict) -> bool:
+    title = record.get("title")
+    types = record.get("pub_types") or []
+    if not isinstance(types, (list, tuple)):
+        types = [types]
+    return bool(isinstance(title, str) and RELATED_REPORT_TITLE.match(title)) or any(
+        _identifier(value) in RELATED_REPORT_TYPES for value in types
+    )
+
+
 def pair_score(a: dict, b: dict) -> dict:
     """Return {score, match_type}: exact identifiers, fuzzy candidate, or none.
 
@@ -125,6 +141,8 @@ def pair_score(a: dict, b: dict) -> dict:
         or not author_matches
         or _conference(a)
         or _conference(b)
+        or _related_report(a)
+        or _related_report(b)
         or journal_conflict
         or page_conflict
     ):
