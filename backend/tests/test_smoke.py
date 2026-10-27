@@ -23,7 +23,7 @@ from app.services.pubmed import SnapshotSourceClient, SourceClient
 from app.services.screening import screen
 
 EXAMPLES = json.loads(
-    (Path(__file__).resolve().parents[2] / "Docs" / "api-examples.json").read_text(
+    (Path(__file__).resolve().parents[2] / "docs" / "api-examples.json").read_text(
         encoding="utf-8"
     )
 )["endpoints"]

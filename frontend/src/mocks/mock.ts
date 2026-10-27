@@ -1,4 +1,4 @@
-/** Browser-local fixture adapter. No external HTTP; samples originate in Docs/api-examples.json. */
+/** Browser-local fixture adapter. No external HTTP; samples originate in docs/api-examples.json. */
 import examples from './api-examples.json';
 import type { Criterion, Decision, DecisionInput, Duplicates, Job, Label, PicoSpan, QueryInput, QueryVersion, RecordDetail, Run } from '../types';
 
