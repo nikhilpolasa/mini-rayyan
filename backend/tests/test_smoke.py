@@ -1,6 +1,8 @@
 """Scaffold contract checks; no external network or persistent database."""
 
 import inspect as python_inspect
+import csv
+import io
 import json
 from datetime import date, timedelta
 from pathlib import Path
@@ -97,16 +99,20 @@ def test_examples_cover_all_routes():
 @pytest.mark.parametrize(
     "record", [{}, {"doi": None, "abstract": None, "year": None, "journal": None}]
 )
-def test_service_stubs(record):
+def test_service_contracts_with_missing_fields(record):
     assert screen(record, []) == {
         "label": "maybe",
-        "reason": "Scaffold stub; screening has not run.",
+        "reason": "no abstract",
         "criterion": "",
     }
     assert pair_score(record, record) == {"score": 0.0, "match_type": "none"}
     assert tag_pico("", []) == []
-    assert normalize_title("Any Title") == ""
-    assert to_csv([record]) == "pmid,doi,title,abstract,year,journal,label,reason\r\n"
+    assert normalize_title("Any Title") == "any title"
+    exported = to_csv([record])
+    assert exported.startswith(
+        "\ufeffpmid,doi,title,abstract,year,journal,label,reason\r\n"
+    )
+    assert len(list(csv.DictReader(io.StringIO(exported.removeprefix("\ufeff"))))) == 1
 
 
 def test_exact_service_signatures():

@@ -1,0 +1,4217 @@
+{
+  "schema_version": 1,
+  "dataset": "synthetic-screening-80",
+  "provenance": "All 80 records and labels are authored synthetic examples; no actual PubMed abstracts or PMIDs.",
+  "labeling_method": "Explicit reference labels assigned while authoring cases, independently of screen() predictions. Not independently human-validated.",
+  "use": "Development checks only; not an estimate of PubMed screening accuracy.",
+  "criteria": [
+    "non_human",
+    "non_english",
+    "case_report",
+    "simulation",
+    "no_abstract"
+  ],
+  "known_limitations": "Three deliberately labeled negative controls expose keyword context/negation false positives. See baseline_limitation on individual cases.",
+  "cases": [
+    {
+      "id": "SYN-001",
+      "scenario": "Animal-only MeSH metadata",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 1,
+        "pmid": null,
+        "doi": null,
+        "title": "Locomotion and sleep in a laboratory model",
+        "abstract": "Locomotion and sleep were measured before and after the intervention in a controlled laboratory experiment.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Animals"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "non_human"
+      },
+      "criterion_matches": {
+        "non_human": true,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Animal-only MeSH metadata",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-002",
+      "scenario": "Case-insensitive animal MeSH",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 2,
+        "pmid": null,
+        "doi": null,
+        "title": "Activity rhythms after laboratory treatment",
+        "abstract": "Activity and sleep were observed under controlled light exposure during laboratory follow-up.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          " animals ",
+          "Physiology"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "non_human"
+      },
+      "criterion_matches": {
+        "non_human": true,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Case-insensitive animal MeSH",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-003",
+      "scenario": "Rat keyword without subject metadata",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 3,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking activity in rats",
+        "abstract": "Rats received an experimental treatment. Walking activity and sleep duration were recorded.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "non_human"
+      },
+      "criterion_matches": {
+        "non_human": true,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Rat keyword without subject metadata",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-004",
+      "scenario": "Singular rat keyword",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 4,
+        "pmid": null,
+        "doi": null,
+        "title": "Sleep after exercise in the rat",
+        "abstract": "A rat underwent an exercise protocol. Sleep was measured after the activity period.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": null,
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "non_human"
+      },
+      "criterion_matches": {
+        "non_human": true,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Singular rat keyword",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-005",
+      "scenario": "Mice keyword with unrelated metadata",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 5,
+        "pmid": null,
+        "doi": null,
+        "title": "Activity and sleep in mice",
+        "abstract": "Mice were assigned to exercise conditions and sleep recordings were collected.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Circadian Rhythm"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "non_human"
+      },
+      "criterion_matches": {
+        "non_human": true,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Mice keyword with unrelated metadata",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-006",
+      "scenario": "Mouse keyword in title",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 6,
+        "pmid": null,
+        "doi": null,
+        "title": "Mouse exercise and sleep responses",
+        "abstract": "An experimental activity protocol was followed by recordings of sleep duration.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "non_human"
+      },
+      "criterion_matches": {
+        "non_human": true,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Mouse keyword in title",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-007",
+      "scenario": "Murine keyword fallback",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 7,
+        "pmid": null,
+        "doi": null,
+        "title": "Exercise in a murine preparation",
+        "abstract": "The murine preparation was used to examine exercise-related changes in sleep markers.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "non_human"
+      },
+      "criterion_matches": {
+        "non_human": true,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Murine keyword fallback",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-008",
+      "scenario": "In vitro phrase fallback",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 8,
+        "pmid": null,
+        "doi": null,
+        "title": "Cell response to activity-related signals",
+        "abstract": "The in vitro experiment measured signaling after exposure to exercise-related factors.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "non_human"
+      },
+      "criterion_matches": {
+        "non_human": true,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "In vitro phrase fallback",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-009",
+      "scenario": "Zebrafish keyword fallback",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 9,
+        "pmid": null,
+        "doi": null,
+        "title": "Activity and sleep in zebrafish",
+        "abstract": "Zebrafish underwent an activity protocol, and investigators recorded sleep-like behavior.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "non_human"
+      },
+      "criterion_matches": {
+        "non_human": true,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Zebrafish keyword fallback",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-010",
+      "scenario": "Hyphenated in-vitro fallback",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 10,
+        "pmid": null,
+        "doi": null,
+        "title": "Laboratory signaling experiment",
+        "abstract": "An in-vitro assay evaluated cellular changes after an experimental intervention.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "non_human"
+      },
+      "criterion_matches": {
+        "non_human": true,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Hyphenated in-vitro fallback",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-011",
+      "scenario": "Humans MeSH overrides both subject tags",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 11,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep in adults",
+        "abstract": "Adults completed walking sessions. Background comparisons discussed rats and mice. Sleep quality was evaluated.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Animals",
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "include",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Humans MeSH overrides both subject tags",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-012",
+      "scenario": "Humans MeSH overrides mouse mention",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 12,
+        "pmid": null,
+        "doi": null,
+        "title": "Computer-assisted sleep assessment",
+        "abstract": "Adults used a computer mouse during assessment. Walking activity and sleep were measured.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "include",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Humans MeSH overrides mouse mention",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-013",
+      "scenario": "Word boundaries do not match ratios",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 13,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep score ratios",
+        "abstract": "Adults completed walking sessions and sleep score ratios were compared between groups.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "include",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Word boundaries do not match ratios",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-014",
+      "scenario": "Word boundaries do not match saturation",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 14,
+        "pmid": null,
+        "doi": null,
+        "title": "Exercise and oxygen saturation",
+        "abstract": "Adults performed walking exercises and reported sleep quality and oxygen saturation.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "include",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Word boundaries do not match saturation",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-015",
+      "scenario": "Humans metadata case normalization",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 15,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep in a human cohort",
+        "abstract": "A human cohort completed walking sessions. The introduction referred to murine findings.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          " HUMANS "
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "include",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Humans metadata case normalization",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-016",
+      "scenario": "Unrelated MeSH without animal words",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 16,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep quality",
+        "abstract": "Adults completed walking sessions and reported sleep duration during follow-up.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Sleep"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "include",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Unrelated MeSH without animal words",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-017",
+      "scenario": "Animal word alone is not an animal keyword",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 17,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking near companion animals",
+        "abstract": "Adults completed walking sessions near companion animals. Sleep quality was assessed. ",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "include",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Animal word alone is not an animal keyword",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-018",
+      "scenario": "Computer mouse is a human device, not an animal subject",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 18,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep with computer-based assessment",
+        "abstract": "Adults used a computer mouse to complete questionnaires. Walking and sleep were tracked over eight weeks.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "include",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Computer mouse is a human device, not an animal subject",
+      "baseline_limitation": "Keyword fallback cannot distinguish a computer mouse from an animal without decisive MeSH metadata."
+    },
+    {
+      "id": "SYN-019",
+      "scenario": "French language metadata",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 19,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep assessment",
+        "abstract": "Des adultes ont suivi un programme de marche. La qualité du sommeil a été évaluée après plusieurs semaines de suivi.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "fre",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "non_english"
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": true,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "French language metadata",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-020",
+      "scenario": "German language metadata",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 20,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep assessment",
+        "abstract": "Erwachsene nahmen an einem Bewegungsprogramm teil. Die Schlafqualität wurde nach mehreren Wochen untersucht.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "deu",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "non_english"
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": true,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "German language metadata",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-021",
+      "scenario": "Spanish language metadata",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 21,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep assessment",
+        "abstract": "Los adultos participaron en un programa de caminatas. La calidad del sueño se evaluó después de varias semanas.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "spa",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "non_english"
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": true,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Spanish language metadata",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-022",
+      "scenario": "Russian language metadata",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 22,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep assessment",
+        "abstract": "Взрослые участвовали в программе ходьбы. Качество сна оценивали после нескольких недель наблюдения.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "rus",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "non_english"
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": true,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Russian language metadata",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-023",
+      "scenario": "Chinese language metadata",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 23,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep assessment",
+        "abstract": "成年人参加了步行锻炼计划。研究人员在随访期间评估睡眠质量，并比较干预组和对照组的结果。",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "zho",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "non_english"
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": true,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Chinese language metadata",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-024",
+      "scenario": "Japanese language metadata",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 24,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep assessment",
+        "abstract": "成人が歩行運動プログラムに参加した。研究者は数週間後に睡眠の質を評価し、対照群と比較した。",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "jpn",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "non_english"
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": true,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Japanese language metadata",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-025",
+      "scenario": "Uppercase foreign metadata",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 25,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep assessment",
+        "abstract": "Des adultes ont suivi un programme de marche. La qualité du sommeil a été évaluée au cours du suivi.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "FRE",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "non_english"
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": true,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Uppercase foreign metadata",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-026",
+      "scenario": "Metadata takes precedence over an English translation",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 26,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep assessment",
+        "abstract": "Adults undertook walking or usual care. Sleep quality was assessed after eight weeks. Participants reported daily function during follow-up.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "deu",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "non_english"
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": true,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Metadata takes precedence over an English translation",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-027",
+      "scenario": "French detection fallback",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 27,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep assessment",
+        "abstract": "Les participants adultes ont suivi un programme de marche pendant plusieurs semaines. La qualité du sommeil et le fonctionnement quotidien ont été évalués. Les résultats ont été comparés à ceux du groupe témoin.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": null,
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "non_english"
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": true,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "French detection fallback",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-028",
+      "scenario": "German detection fallback",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 28,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep assessment",
+        "abstract": "Die erwachsenen Teilnehmer absolvierten über mehrere Wochen ein regelmäßiges Bewegungsprogramm. Anschließend wurden die Schlafqualität und das tägliche Wohlbefinden untersucht. Die Ergebnisse wurden mit einer Kontrollgruppe verglichen.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "non_english"
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": true,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "German detection fallback",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-029",
+      "scenario": "English ISO metadata",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 29,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep assessment",
+        "abstract": "Adults undertook walking or usual care. Sleep quality was assessed after eight weeks. Participants reported daily function during follow-up.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "include",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "English ISO metadata",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-030",
+      "scenario": "Uppercase English metadata",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 30,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep assessment",
+        "abstract": "Adults undertook walking or usual care. Sleep quality was assessed after eight weeks. Participants reported daily function during follow-up.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "ENG",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "include",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Uppercase English metadata",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-031",
+      "scenario": "English two-letter alias",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 31,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep assessment",
+        "abstract": "Adults undertook walking or usual care. Sleep quality was assessed after eight weeks. Participants reported daily function during follow-up.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "en",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "include",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "English two-letter alias",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-032",
+      "scenario": "English spelled out",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 32,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep assessment",
+        "abstract": "Adults undertook walking or usual care. Sleep quality was assessed after eight weeks. Participants reported daily function during follow-up.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "English",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "include",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "English spelled out",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-033",
+      "scenario": "English among multiple metadata languages",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 33,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep assessment",
+        "abstract": "Adults undertook walking or usual care. Sleep quality was assessed after eight weeks. Participants reported daily function during follow-up.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": [
+          "eng",
+          "fre"
+        ],
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "include",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "English among multiple metadata languages",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-034",
+      "scenario": "Missing language with an English abstract",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 34,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep assessment",
+        "abstract": "Adult participants completed a walking program for eight weeks. Sleep quality was measured before treatment and at follow-up. The results were compared with those of a usual care group.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": null,
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "include",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Missing language with an English abstract",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-035",
+      "scenario": "Unknown language metadata uses English detection",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 35,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep assessment",
+        "abstract": "Adults in this study completed regular walking sessions. The researchers evaluated sleep quality and daily functioning using questionnaires. Outcomes were compared between the treatment and control groups.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "und",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "include",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Unknown language metadata uses English detection",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-036",
+      "scenario": "English metadata wins over translated body text",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 36,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep assessment",
+        "abstract": "Des adultes ont suivi un programme de marche. La qualité du sommeil a été évaluée après plusieurs semaines de suivi.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "include",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "English metadata wins over translated body text",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-037",
+      "scenario": "Case Reports metadata",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 37,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep after a clinical intervention",
+        "abstract": "Adults undertook walking or usual care. Sleep quality was assessed after eight weeks. Participants reported daily function during follow-up.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Case Reports"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "case_report"
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": true,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Case Reports metadata",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-038",
+      "scenario": "Case Reports among publication types",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 38,
+        "pmid": null,
+        "doi": null,
+        "title": "Exercise and sleep follow-up",
+        "abstract": "Adults undertook walking or usual care. Sleep quality was assessed after eight weeks. Participants reported daily function during follow-up.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article",
+          "Case Reports"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "case_report"
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": true,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Case Reports among publication types",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-039",
+      "scenario": "Case metadata is case-insensitive",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 39,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep assessment",
+        "abstract": "Adults undertook walking or usual care. Sleep quality was assessed after eight weeks. Participants reported daily function during follow-up.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "case reports"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "case_report"
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": true,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Case metadata is case-insensitive",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-040",
+      "scenario": "Singular case report metadata",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 40,
+        "pmid": null,
+        "doi": null,
+        "title": "Exercise and sleep assessment",
+        "abstract": "Adults undertook walking or usual care. Sleep quality was assessed after eight weeks. Participants reported daily function during follow-up.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Case Report"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "case_report"
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": true,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Singular case report metadata",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-041",
+      "scenario": "Case report metadata string is tolerated",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 41,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep assessment",
+        "abstract": "Adults undertook walking or usual care. Sleep quality was assessed after eight weeks. Participants reported daily function during follow-up.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": "Case Reports",
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "case_report"
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": true,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Case report metadata string is tolerated",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-042",
+      "scenario": "Case report title fallback",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 42,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep: a case report",
+        "abstract": "Adults undertook walking or usual care. Sleep quality was assessed after eight weeks. Participants reported daily function during follow-up.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "case_report"
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": true,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Case report title fallback",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-043",
+      "scenario": "Case-report hyphenated title",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 43,
+        "pmid": null,
+        "doi": null,
+        "title": "Exercise and sleep: a case-report",
+        "abstract": "Adults undertook walking or usual care. Sleep quality was assessed after eight weeks. Participants reported daily function during follow-up.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "case_report"
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": true,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Case-report hyphenated title",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-044",
+      "scenario": "Plural case reports title",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 44,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep: two case reports",
+        "abstract": "Adults undertook walking or usual care. Sleep quality was assessed after eight weeks. Participants reported daily function during follow-up.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "case_report"
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": true,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Plural case reports title",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-045",
+      "scenario": "Uppercase case report title",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 45,
+        "pmid": null,
+        "doi": null,
+        "title": "WALKING AND SLEEP: A CASE REPORT",
+        "abstract": "Adults undertook walking or usual care. Sleep quality was assessed after eight weeks. Participants reported daily function during follow-up.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": null,
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "case_report"
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": true,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Uppercase case report title",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-046",
+      "scenario": "Title fallback despite generic publication metadata",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 46,
+        "pmid": null,
+        "doi": null,
+        "title": "Sleep after walking: a case report",
+        "abstract": "Adults undertook walking or usual care. Sleep quality was assessed after eight weeks. Participants reported daily function during follow-up.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "case_report"
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": true,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Title fallback despite generic publication metadata",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-047",
+      "scenario": "Case-control studies are not case reports",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 47,
+        "pmid": null,
+        "doi": null,
+        "title": "A case-control study of walking and sleep",
+        "abstract": "Adults undertook walking or usual care. Sleep quality was assessed after eight weeks. Participants reported daily function during follow-up.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "include",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Case-control studies are not case reports",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-048",
+      "scenario": "Reporting cases is not a case-report phrase",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 48,
+        "pmid": null,
+        "doi": null,
+        "title": "Reporting participant characteristics in a walking and sleep trial",
+        "abstract": "Adults undertook walking or usual care. Sleep quality was assessed after eight weeks. Participants reported daily function during follow-up.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "include",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Reporting cases is not a case-report phrase",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-049",
+      "scenario": "Showcase word is not case",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 49,
+        "pmid": null,
+        "doi": null,
+        "title": "A showcase of walking and sleep measurement",
+        "abstract": "Adults undertook walking or usual care. Sleep quality was assessed after eight weeks. Participants reported daily function during follow-up.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Clinical Trial"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "include",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Showcase word is not case",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-050",
+      "scenario": "Prospective trial publication type",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 50,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep: a prospective trial",
+        "abstract": "Adults undertook walking or usual care. Sleep quality was assessed after eight weeks. Participants reported daily function during follow-up.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Randomized Controlled Trial"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "include",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Prospective trial publication type",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-051",
+      "scenario": "Publication metadata absent without a case-report title",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 51,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep in a large cohort",
+        "abstract": "Adults undertook walking or usual care. Sleep quality was assessed after eight weeks. Participants reported daily function during follow-up.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": null,
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "include",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Publication metadata absent without a case-report title",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-052",
+      "scenario": "Title phrase boundaries reject reportages",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 52,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep: case reportages in medical education",
+        "abstract": "Adults undertook walking or usual care. Sleep quality was assessed after eight weeks. Participants reported daily function during follow-up.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "include",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Title phrase boundaries reject reportages",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-053",
+      "scenario": "Generic journal article is not a case report",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 53,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep after usual care",
+        "abstract": "Adults undertook walking or usual care. Sleep quality was assessed after eight weeks. Participants reported daily function during follow-up.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "include",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Generic journal article is not a case report",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-054",
+      "scenario": "Case-report phrase describes an exclusion, not this study",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 54,
+        "pmid": null,
+        "doi": null,
+        "title": "Case reports excluded from a walking and sleep trial",
+        "abstract": "Adults undertook walking or usual care. Sleep quality was assessed after eight weeks. Participants reported daily function during follow-up.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Randomized Controlled Trial"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "include",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Case-report phrase describes an exclusion, not this study",
+      "baseline_limitation": "Title fallback cannot distinguish a case-report study from a title describing excluded case reports."
+    },
+    {
+      "id": "SYN-055",
+      "scenario": "In silico keyword in abstract",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 55,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep model",
+        "abstract": "An in silico experiment modeled walking activity and sleep outcomes.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "simulation"
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": true,
+        "no_abstract": false
+      },
+      "label_rationale": "In silico keyword in abstract",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-056",
+      "scenario": "Hyphenated in-silico keyword",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 56,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep prediction",
+        "abstract": "An in-silico model evaluated walking schedules and sleep outcomes.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "simulation"
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": true,
+        "no_abstract": false
+      },
+      "label_rationale": "Hyphenated in-silico keyword",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-057",
+      "scenario": "Monte Carlo keyword",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 57,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep estimates",
+        "abstract": "Monte Carlo sampling generated walking and sleep outcome distributions.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "simulation"
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": true,
+        "no_abstract": false
+      },
+      "label_rationale": "Monte Carlo keyword",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-058",
+      "scenario": "Uppercase Monte Carlo keyword",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 58,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep model",
+        "abstract": "MONTE CARLO methods generated outcomes for hypothetical participants.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "simulation"
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": true,
+        "no_abstract": false
+      },
+      "label_rationale": "Uppercase Monte Carlo keyword",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-059",
+      "scenario": "Simulation model phrase",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 59,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep evaluation",
+        "abstract": "A simulation model evaluated walking schedules and sleep patterns.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "simulation"
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": true,
+        "no_abstract": false
+      },
+      "label_rationale": "Simulation model phrase",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-060",
+      "scenario": "Plural simulation models",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 60,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep evaluation",
+        "abstract": "Several simulation models compared walking schedules and sleep patterns.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "simulation"
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": true,
+        "no_abstract": false
+      },
+      "label_rationale": "Plural simulation models",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-061",
+      "scenario": "Computational model phrase",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 61,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep evaluation",
+        "abstract": "A computational model estimated changes in walking and sleep outcomes.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "simulation"
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": true,
+        "no_abstract": false
+      },
+      "label_rationale": "Computational model phrase",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-062",
+      "scenario": "Plural computational models",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 62,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep evaluation",
+        "abstract": "Computational models generated estimates of walking and sleep outcomes.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "simulation"
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": true,
+        "no_abstract": false
+      },
+      "label_rationale": "Plural computational models",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-063",
+      "scenario": "Simulation in title",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 63,
+        "pmid": null,
+        "doi": null,
+        "title": "Simulation of walking and sleep outcomes",
+        "abstract": "Hypothetical participant data were generated for the analysis.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "simulation"
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": true,
+        "no_abstract": false
+      },
+      "label_rationale": "Simulation in title",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-064",
+      "scenario": "Simulation noun in abstract",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 64,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep evaluation",
+        "abstract": "A numerical simulation generated hypothetical walking and sleep patterns.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "simulation"
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": true,
+        "no_abstract": false
+      },
+      "label_rationale": "Simulation noun in abstract",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-065",
+      "scenario": "Clinical measurements without simulation",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 65,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep in a measured cohort",
+        "abstract": "Adults undertook walking or usual care. Sleep quality was assessed after eight weeks. Participants reported daily function during follow-up.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "include",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Clinical measurements without simulation",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-066",
+      "scenario": "A statistical model alone is not a simulation",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 66,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep with adjusted analysis",
+        "abstract": "Adults completed walking sessions. A mixed-effects model analyzed observed sleep quality scores.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "include",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "A statistical model alone is not a simulation",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-067",
+      "scenario": "A care model is not a computational model",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 67,
+        "pmid": null,
+        "doi": null,
+        "title": "A care model for walking and sleep",
+        "abstract": "A clinical care model supported adults completing walking sessions. Sleep quality was measured in participants.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "include",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "A care model is not a computational model",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-068",
+      "scenario": "Computational assay without a model phrase",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 68,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep questionnaires",
+        "abstract": "Adults completed walking sessions. Computational scoring of recorded sleep questionnaires was compared with manual scoring.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "include",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Computational assay without a model phrase",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-069",
+      "scenario": "Stimulus word is not simulation",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 69,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep after a sensory stimulus",
+        "abstract": "Adults completed walking sessions after a sensory stimulus, and sleep outcomes were measured.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "include",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Stimulus word is not simulation",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-070",
+      "scenario": "Molecular signaling word is not in silico",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 70,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep signaling markers",
+        "abstract": "Adults completed walking sessions. Sleep and signaling markers were measured from participants.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "include",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Molecular signaling word is not in silico",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-071",
+      "scenario": "Monte surname alone is not Monte Carlo",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 71,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep in the Monte cohort",
+        "abstract": "Adults completed walking sessions. Sleep quality was measured during follow-up in the Monte cohort.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "include",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Monte surname alone is not Monte Carlo",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-072",
+      "scenario": "Negated simulation methods in a measured clinical study",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 72,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep in an observed trial",
+        "abstract": "We did not use Monte Carlo methods or a simulation model. Adults completed walking sessions, and sleep quality was measured directly.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "include",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Negated simulation methods in a measured clinical study",
+      "baseline_limitation": "Keyword rules do not resolve negation of simulation methods."
+    },
+    {
+      "id": "SYN-073",
+      "scenario": "Absent abstract",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 73,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep follow-up",
+        "abstract": null,
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "maybe",
+        "criterion": "no_abstract"
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": true
+      },
+      "label_rationale": "Absent abstract",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-074",
+      "scenario": "Empty abstract",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 74,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep follow-up",
+        "abstract": "",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "maybe",
+        "criterion": "no_abstract"
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": true
+      },
+      "label_rationale": "Empty abstract",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-075",
+      "scenario": "Whitespace-only abstract",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 75,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep follow-up",
+        "abstract": " \n\t ",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "maybe",
+        "criterion": "no_abstract"
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": true
+      },
+      "label_rationale": "Whitespace-only abstract",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-076",
+      "scenario": "One query concept is missing",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 76,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and daily mobility",
+        "abstract": "Adults completed walking sessions. Daily mobility was measured after eight weeks.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "maybe",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "One query concept is missing",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-077",
+      "scenario": "Query concepts are unavailable",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 77,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep follow-up",
+        "abstract": "Adults undertook walking or usual care. Sleep quality was assessed after eight weeks. Participants reported daily function during follow-up.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": []
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "maybe",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Query concepts are unavailable",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-078",
+      "scenario": "OR alternatives and case-insensitive terms",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 78,
+        "pmid": null,
+        "doi": null,
+        "title": "EXERCISE and REST in adults",
+        "abstract": "Adults completed an EXERCISE intervention. REST was assessed after follow-up.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep",
+            "rest"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "include",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "OR alternatives and case-insensitive terms",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-079",
+      "scenario": "Whole-word matching avoids a false concept hit",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 79,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking trials and sleep follow-up",
+        "abstract": "Adults undertook walking or usual care. Sleep quality was assessed after eight weeks. Participants reported daily function during follow-up.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "eng",
+        "pub_types": [
+          "Journal Article"
+        ],
+        "mesh": [
+          "Humans"
+        ],
+        "query_groups": [
+          [
+            "trial"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "maybe",
+        "criterion": ""
+      },
+      "criterion_matches": {
+        "non_human": false,
+        "non_english": false,
+        "case_report": false,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Whole-word matching avoids a false concept hit",
+      "baseline_limitation": null
+    },
+    {
+      "id": "SYN-080",
+      "scenario": "Overlapping exclusions preserve the first active match",
+      "provenance": "synthetic; authored for rule validation, not a PubMed record",
+      "record": {
+        "id": 80,
+        "pmid": null,
+        "doi": null,
+        "title": "Walking and sleep: a case report",
+        "abstract": "A clinical observation is described in this synthetic study.",
+        "authors": [
+          "Synthetic Example"
+        ],
+        "year": 2024,
+        "journal": "Synthetic Fixture Journal",
+        "language": "fre",
+        "pub_types": [
+          "Case Reports"
+        ],
+        "mesh": [
+          "Animals"
+        ],
+        "query_groups": [
+          [
+            "walking",
+            "exercise"
+          ],
+          [
+            "sleep"
+          ]
+        ]
+      },
+      "active_criteria": [
+        "non_human",
+        "non_english",
+        "case_report",
+        "simulation",
+        "no_abstract"
+      ],
+      "expected": {
+        "label": "exclude",
+        "criterion": "non_human"
+      },
+      "criterion_matches": {
+        "non_human": true,
+        "non_english": true,
+        "case_report": true,
+        "simulation": false,
+        "no_abstract": false
+      },
+      "label_rationale": "Overlapping exclusions preserve the first active match",
+      "baseline_limitation": null
+    }
+  ]
+}

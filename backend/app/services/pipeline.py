@@ -17,8 +17,8 @@ from .. import models as m
 from ..db import utc_now
 from . import decisions, dedup, pico, pubmed, screening
 
-SCREEN_VERSION = "screen-v1"
-PICO_VERSION = "pico-v1"
+SCREEN_VERSION = "screen-v2"
+PICO_VERSION = "pico-v2"
 PIPELINE_VERSION = "pipeline-v1"
 # ponytail: serialize local jobs; add a durable queue/shared lock for multiple workers.
 job_lock = RLock()

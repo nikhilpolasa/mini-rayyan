@@ -7,10 +7,9 @@ from sqlalchemy.orm import Session
 
 from .. import models as m
 from . import matching
+from .matching import AUTO_THRESHOLD, UNCERTAIN_THRESHOLD as PENDING_THRESHOLD
 
-AUTO_THRESHOLD = 0.95
-PENDING_THRESHOLD = 0.85
-DEDUP_VERSION = "dedup-v1"
+DEDUP_VERSION = "dedup-v2"
 
 
 def record_dict(record: m.Record) -> dict:
