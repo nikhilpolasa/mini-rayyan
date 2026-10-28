@@ -362,6 +362,8 @@ def process(session: Session, query: m.Query) -> dict:
         return {
             "records_in": len(visible),
             "records_screened": processed,
+            "screened": processed,
+            "reused": len(visible) - processed,
             "auto_excluded": excluded,
         }
 
@@ -371,7 +373,7 @@ def process(session: Session, query: m.Query) -> dict:
     )
 
     def pico_step(run):
-        processed, tagged = 0, 0
+        processed, tagged, eligible = 0, 0, 0
         for record in visible:
             if (
                 decisions.effective_status(
@@ -384,11 +386,12 @@ def process(session: Session, query: m.Query) -> dict:
                 != "include"
             ):
                 continue
+            eligible += 1
             counts = _tag_record(session, record, groups, pico_version, run)
             processed += counts["records_tagged"]
             tagged += counts["pico_spans_added"]
         session.flush()
-        return {"records_tagged": processed, "pico_spans_added": tagged}
+        return {"records_tagged": processed, "pico_spans_added": tagged, "tagged": processed, "tag_reused": eligible - processed}
 
     counts.update(_step(session, query.id, "pico", pico_version, pico_step))
     return counts

@@ -64,3 +64,27 @@ rule change can change a prior version's projected groups; labels can change
 after human decisions. Fresh live searches can return different IDs later, so
 this is not a frozen-source replay. Durable job recovery and incremental
 processing of externally updated abstracts remain future Level 2 work.
+
+## Implemented loop checks
+
+The combined dedup projection connects a new paper to two earlier groups using
+the existing DOI/title/year/author matching rules. It keeps one lowest-ID
+representative and all stored records. Different human Include/Exclude labels
+leave all conflicted members visible with `pending` status in
+`GET /api/duplicates`; a group-label decision resolves them. Matching labels
+keep one visible representative. Human decisions remain append-only.
+
+On a re-finding query with the same concepts, existing PMIDs get another
+`query_records` link without an EFetch request; the human Exclude still wins.
+Screen results are reused when query groups, criteria, record content and rule
+version are unchanged. The screen run log now records `screened` and `reused`;
+PICO records `tagged` and `tag_reused`. Editing one abstract rescreens that
+record. Changing the query concepts invalidates screening for every record
+linked to that changed query, because the current cache context includes all
+query groups. Untagged Include records with zero generated spans cannot yet be
+distinguished from records that were never tagged, so they may be retagged.
+
+`scripts/seed_loop_demo.py` creates a fictional two-version example only in a
+new empty database and refuses to touch populated data. It prints the two
+required cases to demonstrate. This script uses authored synthetic records,
+not PubMed evidence.
