@@ -126,9 +126,8 @@ def test_exact_service_signatures():
         assert str(python_inspect.signature(function)) == expected
 
 
-@pytest.mark.parametrize("client_class", [SourceClient, SnapshotSourceClient])
-def test_source_contracts_are_unimplemented(client_class):
-    client = client_class()
+def test_source_contracts_are_abstract():
+    client = SourceClient()
     with pytest.raises(NotImplementedError):
         client.search_count("example", date(2020, 1, 1), date(2026, 1, 1))
     with pytest.raises(NotImplementedError):

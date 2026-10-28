@@ -195,8 +195,9 @@ The 60-100 independently reviewed PubMed abstracts are later validation work.
 
 The in-process background queue uses independent sessions, a local lock and
 per-step transactions. Run one backend worker; jobs are not durable across process
-crashes. SOURCE_MODE=snapshot selects an adapter whose format/parser is still
-pending organizer specifications. Exact revert, diff views and durable recovery
+crashes. `SOURCE_MODE=snapshot` with `SNAPSHOT_PATH` selects the
+[provisional offline format](docs/snapshot-format.md); it is not the organizer's
+announced format. Exact revert, diff views and durable recovery
 remain Level 2 work. Never delete evidence to recover or retry a review.
 
 PubMed content is provided through NCBI/NLM. Inclusion does not imply endorsement;
