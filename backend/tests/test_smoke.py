@@ -103,7 +103,7 @@ def test_examples_cover_all_routes():
 def test_service_contracts_with_missing_fields(record):
     assert screen(record, []) == {
         "label": "maybe",
-        "reason": "no abstract",
+        "reason": "no abstract [metadata: abstract=missing]",
         "criterion": "",
     }
     assert pair_score(record, record) == {"score": 0.0, "match_type": "none"}

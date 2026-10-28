@@ -200,7 +200,7 @@ def test_simulation_keywords(term):
 def test_no_abstract_is_maybe(abstract):
     assert s.screen(record(abstract=abstract), ["no_abstract"]) == {
         "label": "maybe",
-        "reason": "no abstract",
+        "reason": "no abstract [metadata: abstract=missing]",
         "criterion": "no_abstract",
     }
 
@@ -265,7 +265,7 @@ def test_relevance_uses_query_groups_without_topic_vocabulary():
     )
     assert s.screen(unrelated_topic, []) == {
         "label": "include",
-        "reason": "matches all query concepts",
+        "reason": "matches all query concepts [algorithm: query_groups, matched 'ceramic']",
         "criterion": "",
     }
     unrelated_topic["query_groups"].append(["humidity", "moisture"])

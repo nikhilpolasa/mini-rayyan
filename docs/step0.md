@@ -60,6 +60,19 @@ the first matching exclusion. Every Exclude stores a reason and criterion key.
 No abstract remains Maybe under PRD S6 even if its named criterion is disabled.
 Humans MeSH prevents animal-keyword exclusion, but does not disable other rules.
 
+| Criterion | Metadata field used | Fallback algorithm | Known failure cases |
+|---|---|---|---|
+| `non_human` | `mesh=Animals` without `Humans` | Animal/in-vitro word boundaries in title or abstract | Negated or background animal mentions can falsely exclude; `Animals` plus `Humans` does not exclude |
+| `non_english` | Scalar `language` | Seeded `langdetect` on >=20 letters at >=0.90 confidence | Short, mixed-language or non-Latin text may be uncertain; multiple languages are not preserved by the current scalar parser |
+| `case_report` | `pub_types=Case Reports` | Case-report title pattern | Case reports without type or title phrase can be missed; phrase in unrelated context can mislead |
+| `simulation` | None | In-silico, Monte Carlo, simulation and computational-model patterns | Mentioning a model as background can falsely exclude; synonyms can be missed |
+| `no_abstract` | Empty/missing `abstract` | None; Maybe for manual review | Missing text does not establish ineligibility |
+| Query relevance (Include/Maybe) | No eligibility metadata | Match query concept groups against title/abstract | Synonyms and negation can change meaning; missing groups remain Maybe |
+
+Screening reasons carry a bracketed source tag: `[metadata: field=value]` or
+`[algorithm: rule, matched 'snippet']`. The source is the evidence for the
+returned label, not a claim that every other field was validated.
+
 ## Human review and evidence limits
 
 Reviewers can change labels, resolve duplicate pairs, edit PICO spans, add notes,

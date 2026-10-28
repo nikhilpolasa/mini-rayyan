@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from app.services import export, matching, pico
+from app.services import export, matching, pico, pipeline
 
 
 def paper(**updates):
@@ -472,7 +472,7 @@ def test_new_pipeline_versions_replace_cached_stub_outputs_without_losing_humans
             next(run for run in logs if run["id"] == job.json()["run_id"])["status"]
             == "completed"
         )
-        assert any(run["rule_set_version"].startswith("screen-v2-") for run in logs)
+        assert any(run["rule_set_version"].startswith(pipeline.SCREEN_VERSION + "-") for run in logs)
         assert any(run["rule_set_version"].startswith("pico-v2-") for run in logs)
         assert any(run["rule_set_version"].startswith("dedup-v3-") for run in logs)
         assert client.get("/api/records/1").json()["label"] == "include"
@@ -500,7 +500,7 @@ def test_new_pipeline_versions_replace_cached_stub_outputs_without_losing_humans
             len(
                 session.scalars(
                     select(m.ScreenResult).where(
-                        m.ScreenResult.rule_set_version.like("screen-v2-%")
+                        m.ScreenResult.rule_set_version.like(pipeline.SCREEN_VERSION + "-%")
                     )
                 ).all()
             )

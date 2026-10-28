@@ -26,6 +26,15 @@ SIMULATION_PATTERN = re.compile(
 )
 
 
+def _metadata(reason: str, field: str, value: str) -> str:
+    return f"{reason} [metadata: {field}={value}]"
+
+
+def _algorithm(reason: str, rule: str, snippet: str) -> str:
+    safe = str(snippet).replace("'", "’").replace("]", ")")[:80]
+    return f"{reason} [algorithm: {rule}, matched '{safe}']"
+
+
 def _text(value) -> str:
     """Normalize comparison text, treating absent/non-string values as empty."""
     return " ".join(value.casefold().split()) if isinstance(value, str) else ""
@@ -110,30 +119,44 @@ def screen(record: dict, active_criteria: list[str]) -> dict:
         reason = ""
         if criterion == "non_human":
             reason = _non_human(record, text)
+            if reason:
+                reason = (
+                    _metadata(reason, "mesh", "Animals")
+                    if reason.startswith("MeSH")
+                    else _algorithm(reason, "animal_keyword", reason.split(": ", 1)[1])
+                )
         elif criterion == "non_english":
             reason, uncertain_language = _language(record, abstract)
+            if reason:
+                reason = (
+                    _metadata(reason, "language", ",".join(sorted(_values(record.get("language")))))
+                    if "metadata" in reason
+                    else _algorithm(reason, "langdetect", reason.rsplit(": ", 1)[-1])
+                )
         elif criterion == "case_report":
             if set(_values(record.get("pub_types"))) & {"case report", "case reports"}:
-                reason = "publication type Case Reports"
-            elif CASE_PATTERN.search(title):
-                reason = "case report in title"
+                reason = _metadata("publication type Case Reports", "pub_types", "Case Reports")
+            else:
+                match = CASE_PATTERN.search(title)
+                if match:
+                    reason = _algorithm("case report in title", "case_report_title", match.group())
         elif criterion == "simulation":
             match = SIMULATION_PATTERN.search(text)
             if match:
-                reason = f"simulation keyword: {match.group()}"
+                reason = _algorithm(f"simulation keyword: {match.group()}", "simulation_keyword", match.group())
         if reason:
             return {"label": "exclude", "reason": reason, "criterion": criterion}
     if not abstract:
         return {
             "label": "maybe",
-            "reason": "no abstract",
+            "reason": _metadata("no abstract", "abstract", "missing"),
             "criterion": "no_abstract" if "no_abstract" in active else "",
         }
     raw_groups = record.get("query_groups")
     if not isinstance(raw_groups, (list, tuple)) or not raw_groups:
         return {
             "label": "maybe",
-            "reason": "query concepts unavailable",
+            "reason": _algorithm("query concepts unavailable", "query_groups", "none"),
             "criterion": "",
         }
     missing = []
@@ -146,13 +169,13 @@ def screen(record: dict, active_criteria: list[str]) -> dict:
     if missing:
         return {
             "label": "maybe",
-            "reason": "missing query concept: " + "; ".join(missing),
+            "reason": _algorithm("missing query concept: " + "; ".join(missing), "query_concept_gap", missing[0]),
             "criterion": "",
         }
     if uncertain_language:
         return {
             "label": "maybe",
-            "reason": "language could not be determined confidently",
+            "reason": _algorithm("language could not be determined confidently", "langdetect", "inconclusive"),
             "criterion": "non_english",
         }
-    return {"label": "include", "reason": "matches all query concepts", "criterion": ""}
+    return {"label": "include", "reason": _algorithm("matches all query concepts", "query_groups", next((term for group in raw_groups for term in _values(group) if _has_term(text, term)), "all groups")), "criterion": ""}

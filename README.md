@@ -149,7 +149,7 @@ outcomes, with three documented keyword-context false positives; this does not
 measure real PubMed accuracy. Independently label actual fetched abstracts using
 `fixtures/pubmed_screening.template.json` before reporting real-data metrics.
 
-The current algorithm versions are `screen-v2`, `pico-v2` and `dedup-v3`.
+The current algorithm versions are `screen-v3`, `pico-v2` and `dedup-v3`.
 This advances past the original stubs, so rerunning processes old cached results
 under new versions while preserving their history and all human decisions. The
 shared matching thresholds are imported by the grouping service. Future algorithm
@@ -194,6 +194,19 @@ protocol documents alone do not establish that the live demonstration passed.
 The 60-100 independently reviewed PubMed abstracts are later validation work.
 
 ## Rule methods and limits
+
+| Criterion | Metadata field used | Fallback algorithm | Known failure cases |
+|---|---|---|---|
+| Non-human | MeSH `Animals` without `Humans` | Animal/in-vitro title or abstract terms | Background/negated animal mention; mixed Animals+Humans is retained |
+| Non-English | Scalar `language` | Deterministic language detection | Short, mixed or non-Latin text; secondary language may be lost |
+| Case report | `pub_types` | Case-report title regex | Missing type and title phrase; contextual false positives |
+| Simulation | None | In-silico/Monte Carlo/model keywords | Background mention or unlisted synonym |
+| No abstract | Empty `abstract` | None; Maybe | No text to assess |
+| Query relevance | None | Query-group term matching | Synonyms and negation |
+
+Each screen reason ends with its evidence source. Run
+`python scripts/screening_report.py` for per-criterion source counts on the
+clearly synthetic fixtures; those counts are not clinical accuracy estimates.
 
 - **Screening:** MeSH species tags, language metadata and publication types first;
   animal/title regexes and deterministic language detection as fallbacks.
