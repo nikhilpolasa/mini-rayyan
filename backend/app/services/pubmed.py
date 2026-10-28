@@ -1,5 +1,6 @@
-"""Synchronous PubMed adapter; snapshot parsing remains unimplemented."""
+"""Synchronous PubMed and provisional offline snapshot adapters."""
 
+import json
 import os
 import re
 from datetime import date
@@ -293,4 +294,74 @@ class LiveSourceClient(SourceClient):
 
 
 class SnapshotSourceClient(SourceClient):
-    pass
+    """Read the provisional v1 manifest; replace this adapter for the official format."""
+
+    def __init__(self):
+        path = os.getenv("SNAPSHOT_PATH", "").strip()
+        if not path:
+            raise ValueError("SNAPSHOT_PATH is required for SOURCE_MODE=snapshot")
+        with open(path, encoding="utf-8") as source:
+            snapshot = json.load(source)
+        if (
+            not isinstance(snapshot, dict)
+            or snapshot.get("version") != 1
+            or not isinstance(snapshot.get("queries"), dict)
+            or not isinstance(snapshot.get("records"), dict)
+        ):
+            raise ValueError("Unsupported provisional snapshot format (expected version 1)")
+        self.queries = snapshot["queries"]
+        self.records = snapshot["records"]
+        self.fetch_cap = int(os.getenv("FETCH_CAP", "500"))
+        if self.fetch_cap < 0:
+            raise ValueError("FETCH_CAP must be nonnegative")
+
+    @staticmethod
+    def normalize_query(text: str) -> str:
+        return " ".join(text.lower().split())
+
+    def _entry(self, text: str) -> dict | None:
+        return self.queries.get(self.normalize_query(text))
+
+    def _ids(self, entry: dict, date_from: date, date_to: date) -> list[str]:
+        ids = entry["pmids"]
+        # Missing years cannot be checked, so keep those records in the replay.
+        return [
+            pmid
+            for pmid in ids
+            if (year := self.records.get(pmid, {}).get("year")) is None
+            or date_from.year <= int(year) <= date_to.year
+        ]
+
+    def search_count(self, text: str, date_from: date, date_to: date) -> dict:
+        if date_from > date_to:
+            raise ValueError("date_from must be on or before date_to")
+        entry = self._entry(text)
+        if entry is None:
+            return {"hit_count": 0, "translation": "not in snapshot"}
+        ids = self._ids(entry, date_from, date_to)
+        # A captured search can have more hits than stored PMIDs. Preserve its
+        # original count unless the stored manifest is complete.
+        count = len(ids) if entry["count"] == len(entry["pmids"]) else entry["count"]
+        return {"hit_count": count, "translation": self.normalize_query(text)}
+
+    def search_ids(
+        self,
+        text: str,
+        date_from: date,
+        date_to: date,
+        limit: int = 500,
+        offset: int = 0,
+    ) -> list[str]:
+        if limit < 0 or offset < 0:
+            raise ValueError("limit and offset must be nonnegative")
+        if date_from > date_to:
+            raise ValueError("date_from must be on or before date_to")
+        entry = self._entry(text)
+        if entry is None:
+            return []
+        return self._ids(entry, date_from, date_to)[
+            offset : offset + min(limit, self.fetch_cap)
+        ]
+
+    def fetch_records(self, pmids: list[str]) -> list[dict]:
+        return [dict(self.records[pmid]) for pmid in pmids if pmid in self.records]

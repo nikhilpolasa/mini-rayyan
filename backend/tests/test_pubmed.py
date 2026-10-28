@@ -340,9 +340,8 @@ def test_default_tool_and_owned_client(monkeypatch):
     assert client._client.is_closed
 
 
-@pytest.mark.parametrize("client_class", [p.SourceClient, p.SnapshotSourceClient])
-def test_unimplemented_sources(client_class):
-    client = client_class()
+def test_source_interface_is_abstract():
+    client = p.SourceClient()
     for method, args in [
         (client.search_count, ("example", START, END)),
         (client.search_ids, ("example", START, END)),
