@@ -16,6 +16,10 @@ not trained clinical models or a claim of validated medical performance.
 
 ## Backend setup (Windows PowerShell)
 
+Search-thread Phase A separates query histories only. Labels, notes, human PICO
+edits, duplicate groups/visibility and criteria remain shared across threads.
+Phase B judgment isolation is not implemented.
+
 Run from the repository root (`mini-rayyan/`):
 
 ```powershell
@@ -46,6 +50,28 @@ Initialize an **empty** database once, then start the backend:
 .\.venv\Scripts\python.exe scripts/reset_db.py
 .\.venv\Scripts\python.exe -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000
 ```
+
+For an existing database, stop the backend and run the additive migration first
+from the same repository directory and with the same `DATABASE_URL`:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/migrate_add_projects.py
+```
+
+It prints the tables/legacy projects added and the backup path. Existing SQLite
+files are backed up under adjacent `backups/` using SQLite's backup API (including
+WAL data) before writes. Existing PostgreSQL requires `pg_dump` on PATH and a
+successful backup. Failure stops the migration. Repeating it is a no-op; old
+query IDs, versions, parents, records and decisions are unchanged. Startup also
+uses the same backup-before-write path, but the explicit command makes the report
+and backup easy to inspect. PostgreSQL integration must be tested on the target
+server before deployment; SQL-generation/backup unit tests are not that proof.
+
+The sidebar's **New search** creates a titled thread beginning at v1. **Revise
+(new version)** adds a version inside the selected thread. Legacy history remains
+in project 1, **Imported history (legacy)**. The URL carries `project_id` per tab;
+changing threads clears query selection and resets the query form. No database
+reset, automatic topic conversion or legacy history renumbering is performed.
 
 Open `http://localhost:8000/docs` for the interactive API and
 `http://localhost:8000/api/health` for liveness. Always launch database scripts and

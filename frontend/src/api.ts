@@ -1,5 +1,5 @@
 import { mockRequest } from './mocks/mock';
-import type { Criterion, Decision, DecisionInput, Duplicates, Job, QueryCreated, QueryInput, QueryVersion, RecordDetail, RecordFilters, RecordPage, Run } from './types';
+import type { Criterion, Decision, DecisionInput, Duplicates, Job, Project, QueryCreated, QueryInput, QueryVersion, RecordDetail, RecordFilters, RecordPage, Run } from './types';
 
 const baseUrl = () => (import.meta.env.VITE_API_BASE_URL ?? '').trim().replace(/\/+$/, '');
 export const isMockMode = () => !baseUrl();
@@ -32,7 +32,9 @@ async function request<T>(path: string, method = 'GET', body?: unknown, signal?:
 /** All backend requests go through this transport. API base is an origin, without /api. */
 export const api = {
   health: (signal?: AbortSignal) => request<{ status: string }>('/api/health', 'GET', undefined, signal),
-  queries: (signal?: AbortSignal) => request<QueryVersion[]>('/api/queries', 'GET', undefined, signal),
+  projects: (signal?: AbortSignal) => request<Project[]>('/api/projects', 'GET', undefined, signal),
+  createProject: (title: string) => request<Project>('/api/projects', 'POST', { title }),
+  queries: (signal?: AbortSignal, projectId?: number) => request<QueryVersion[]>(`/api/queries${projectId === undefined ? '' : `?project_id=${projectId}`}`, 'GET', undefined, signal),
   query: (id: number, signal?: AbortSignal) => request<QueryVersion>(`/api/queries/${id}`, 'GET', undefined, signal),
   createQuery: (input: QueryInput) => request<QueryCreated>('/api/queries', 'POST', input),
   approve: (id: number) => request<{ id: number; status: 'approved' }>(`/api/queries/${id}/approve`, 'POST'),

@@ -41,6 +41,7 @@ def test_table_creation():
     Base.metadata.create_all(engine)
     inspector = inspect(engine)
     assert set(inspector.get_table_names()) == {
+        "projects",
         "queries",
         "records",
         "query_records",

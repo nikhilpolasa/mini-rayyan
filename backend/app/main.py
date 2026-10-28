@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from . import db  # Load the root .env before reading configuration.
 from .services.criteria import ensure_criteria
+from .services.projects import migrate_projects
 from .routers import (
     criteria,
     decisions,
@@ -15,6 +16,7 @@ from .routers import (
     export,
     health,
     pipeline,
+    projects,
     queries,
     records,
     runs,
@@ -26,6 +28,7 @@ async def lifespan(application):
     # Use the normal DB provider, including an isolated test override when set.
     provider = application.dependency_overrides.get(db.get_db, db.get_db)
     with contextmanager(provider)() as session:
+        migrate_projects(session.get_bind(), initialize_schema=True)
         db.Base.metadata.create_all(session.get_bind())
         ensure_criteria(session)
         session.commit()
@@ -51,6 +54,7 @@ app.add_middleware(
 
 for module in (
     queries,
+    projects,
     pipeline,
     records,
     runs,

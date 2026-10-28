@@ -15,6 +15,7 @@ from sqlalchemy import inspect, select
 
 from app import models  # Register every table.
 from app.db import Base, engine
+from app.services.projects import migrate_projects
 
 
 def reset_db() -> None:
@@ -29,6 +30,7 @@ def reset_db() -> None:
                 raise RuntimeError(
                     "Database contains data; use DATABASE_URL for a new empty database."
                 )
+    migrate_projects(engine, initialize_schema=True)
     Base.metadata.create_all(engine)
     logging.info(
         "Initialized %d tables without deleting data.", len(Base.metadata.tables)

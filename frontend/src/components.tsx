@@ -65,4 +65,13 @@ export function useQueryContext() {
   const query = new URLSearchParams(useRoute().split('?')[1]).get('query_id');
   return query && /^[1-9]\d*$/.test(query) ? Number(query) : undefined;
 }
-export function queryLink(path: string, queryId?: number) { return `#${path}${queryId === undefined ? '' : `?query_id=${queryId}`}`; }
+export function useProjectContext() {
+  const project = new URLSearchParams(useRoute().split('?')[1]).get('project_id');
+  return project && /^[1-9]\d*$/.test(project) ? Number(project) : 1;
+}
+export function queryLink(path: string, queryId?: number, projectId?: number) {
+  const params = new URLSearchParams();
+  if (projectId !== undefined) params.set('project_id', String(projectId));
+  if (queryId !== undefined) params.set('query_id', String(queryId));
+  return `#${path}${params.size ? `?${params}` : ''}`;
+}

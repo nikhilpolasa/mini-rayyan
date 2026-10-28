@@ -1,7 +1,8 @@
 export type Label = 'include' | 'exclude' | 'maybe';
 export type Source = 'machine' | 'human';
 export type QueryStatus = 'saved' | 'approved' | 'fetching' | 'fetched' | 'failed';
-export interface QueryInput { text: string; date_from: string; date_to: string }
+export interface QueryInput { text: string; date_from: string; date_to: string; project_id?: number; parent_id?: number | null }
+export interface Project { id: number; title: string; created_at: string }
 export interface QueryCreated { id: number; version: number; hit_count: number; translation: string }
 export interface QueryVersion extends QueryCreated, QueryInput {
   project_id: number; parent_id: number | null; status: QueryStatus;

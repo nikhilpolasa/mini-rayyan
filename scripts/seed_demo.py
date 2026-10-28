@@ -12,13 +12,21 @@ from sqlalchemy import select
 from app import models as m
 from app.db import Base, SessionLocal, engine, utc_now
 from app.services.criteria import ensure_criteria
+from app.services.projects import migrate_projects
 
 
 def seed_demo() -> None:
     """Insert three queries, ten synthetic records, a duplicate pair and decisions."""
+    migrate_projects(engine, initialize_schema=True)
     Base.metadata.create_all(engine)
     with SessionLocal.begin() as session:
         for table in Base.metadata.sorted_tables:
+            if table.name == "projects":
+                if any(row.id != 1 for row in session.scalars(select(m.Project))):
+                    raise RuntimeError(
+                        "Seed requires an empty database; existing searches were left untouched."
+                    )
+                continue  # The migration's empty legacy thread is safe to keep.
             if session.execute(select(table).limit(1)).first():
                 raise RuntimeError(
                     "Seed requires an empty database; existing data was left untouched."

@@ -14,6 +14,8 @@ class QueryCreate(BaseModel):
     text: str = Field(min_length=1)
     date_from: date
     date_to: date
+    project_id: int | None = Field(default=None, gt=0)
+    parent_id: int | None = Field(default=None, gt=0)
 
     @model_validator(mode="after")
     def validate_dates(self):
@@ -27,6 +29,16 @@ class QueryCreated(BaseModel):
     version: int
     hit_count: int
     translation: str
+
+
+class ProjectCreate(BaseModel):
+    title: str = Field(min_length=1, max_length=200)
+
+
+class ProjectOut(BaseModel):
+    id: int
+    title: str
+    created_at: datetime
 
 
 class QueryDetail(QueryCreated, QueryCreate):

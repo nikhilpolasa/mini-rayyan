@@ -31,9 +31,9 @@ it('keeps detail caches separate when the same paper is opened in two query cont
     await screen.findByRole('heading', { name: 'Query 1 paper' });
     act(() => { window.location.hash = '#/records/1?query_id=2'; window.dispatchEvent(new HashChangeEvent('hashchange')); });
     await screen.findByRole('heading', { name: 'Query 2 paper' });
-    expect(client.getQueryData(['record', 1, 1])).toMatchObject({ label: 'include' });
-    expect(client.getQueryData(['record', 1, 2])).toMatchObject({ label: 'maybe' });
-    expect(screen.getByRole('link', { name: /Back to records/ }).getAttribute('href')).toBe('#/records?query_id=2');
+    expect(client.getQueryData(['record', 1, 1, 1])).toMatchObject({ label: 'include' });
+    expect(client.getQueryData(['record', 1, 1, 2])).toMatchObject({ label: 'maybe' });
+    expect(screen.getByRole('link', { name: /Back to records/ }).getAttribute('href')).toBe('#/records?project_id=1&query_id=2');
   } finally { view.unmount(); client.clear(); vi.restoreAllMocks(); }
 });
 
@@ -43,7 +43,7 @@ it('retains the selected query in record links and export previews/downloads', a
   const list = render(<QueryClientProvider client={client}><RecordsPage/></QueryClientProvider>);
   await screen.findByText('3 matching records');
   expect(screen.getByLabelText('Query version')).toHaveProperty('value', '1');
-  expect(screen.getAllByRole('link').some(link => link.getAttribute('href') === '#/records/1?query_id=1')).toBe(true);
+  expect(screen.getAllByRole('link').some(link => link.getAttribute('href') === '#/records/1?project_id=1&query_id=1')).toBe(true);
   list.unmount();
   const records = vi.spyOn(api, 'records');
   const exported = vi.spyOn(api, 'exportCsv');

@@ -1,13 +1,13 @@
 /** Browser-local fixture adapter. No external HTTP; samples originate in docs/api-examples.json. */
 import examples from './api-examples.json';
-import type { Criterion, Decision, DecisionInput, Duplicates, Job, Label, PicoSpan, QueryInput, QueryVersion, RecordDetail, Run } from '../types';
+import type { Criterion, Decision, DecisionInput, Duplicates, Job, Label, PicoSpan, Project, QueryInput, QueryVersion, RecordDetail, Run } from '../types';
 
 function example<T>(path: string): T {
   const endpoint = examples.endpoints.find(item => item.method === 'GET' && item.path.split('?')[0] === path);
   if (!endpoint) throw new Error(`Missing mock fixture: ${path}`);
   return structuredClone(endpoint.response) as T;
 }
-type State = { queries: QueryVersion[]; records: RecordDetail[]; criteria: Criterion[]; duplicates: Duplicates; decisions: Decision[]; runs: Run[]; links: Record<string, number[]>; jobs: { id: number; finish: number }[] };
+type State = { projects: Project[]; queries: QueryVersion[]; records: RecordDetail[]; criteria: Criterion[]; duplicates: Duplicates; decisions: Decision[]; runs: Run[]; links: Record<string, number[]>; jobs: { id: number; finish: number }[] };
 const storageKey = 'mini-rayyan-mock-v1';
 const now = () => new Date().toISOString();
 const idNext = (items: { id: number }[]) => Math.max(0, ...items.map(item => item.id)) + 1;
@@ -25,14 +25,14 @@ function initialState(): State {
     title: `Fictional candidate ${id} · metadata not supplied in the example`, abstract: null,
     authors: [], pico_spans: [], decisions: [], group: null, query_versions: [queries[0]],
   });
-  return { queries, records, criteria: example<Criterion[]>('/api/criteria'), duplicates,
+  return { projects: [{ id: 1, title: 'Imported history (legacy)', created_at: queries[0]?.created_at ?? now() }], queries, records, criteria: example<Criterion[]>('/api/criteria'), duplicates,
     decisions: example<Decision[]>('/api/decisions'), runs: [], links: { '1': ids }, jobs: [] };
 }
 
 function load(): State {
   try {
     const saved = sessionStorage.getItem(storageKey);
-    if (saved) { const state = JSON.parse(saved) as State; if (Array.isArray(state.queries) && Array.isArray(state.jobs)) return state; }
+    if (saved) { const state = JSON.parse(saved) as State; if (Array.isArray(state.queries) && Array.isArray(state.jobs)) { state.projects ??= [{ id: 1, title: 'Imported history (legacy)', created_at: state.queries[0]?.created_at ?? now() }]; return state; } }
   } catch { /* Storage may be unavailable; keep a session in memory. */ }
   return initialState();
 }
@@ -146,14 +146,30 @@ export async function mockRequest<T>(path: string, method = 'GET', body?: unknow
   }
   let result: unknown;
   if (resource === 'health') result = { status: 'ok' };
+  else if (resource === 'projects') {
+    if (method === 'POST') {
+      const title = String(object(body).title ?? '').trim();
+      if (!title || title.length > 200) throw new Error('Enter a search title of 1 to 200 characters.');
+      const project: Project = { id: idNext(state.projects), title, created_at: now() };
+      state.projects.push(project); result = project;
+    } else result = [...state.projects].sort((a, b) => b.created_at.localeCompare(a.created_at) || b.id - a.id);
+  }
   else if (resource === 'queries') {
     if (method === 'POST' && parts.length === 2) {
       const input = body as QueryInput;
       if (!input.text.trim() || !input.date_from || !input.date_to || input.date_from > input.date_to) throw new Error('Enter a query and a valid date range.');
-      const latest = state.queries.at(-1);
-      const query: QueryVersion = { ...input, id: idNext(state.queries), version: (latest?.version ?? 0) + 1, project_id: 1, parent_id: latest?.id ?? null, hit_count: state.queries[0]?.hit_count ?? 42, translation: input.text, created_at: now(), status: 'saved', counts: { records: 0, include: 0, exclude: 0, maybe: 0 } };
+      const projectId = input.project_id ?? 1;
+      requireItem(state.projects, project => project.id === projectId, 'Search');
+      const latest = [...state.queries].filter(query => query.project_id === projectId).sort((a, b) => b.version - a.version)[0];
+      const parentId = Object.hasOwn(input, 'parent_id') ? input.parent_id ?? null : latest?.id ?? null;
+      if (parentId !== null && requireItem(state.queries, query => query.id === parentId, 'Parent').project_id !== projectId) throw new Error('Parent query must belong to the same search');
+      const query: QueryVersion = { ...input, id: idNext(state.queries), version: (latest?.version ?? 0) + 1, project_id: projectId, parent_id: parentId, hit_count: state.queries[0]?.hit_count ?? 42, translation: input.text, created_at: now(), status: 'saved', counts: { records: 0, include: 0, exclude: 0, maybe: 0 } };
       state.queries.push(query); result = { id: query.id, version: query.version, hit_count: query.hit_count, translation: query.translation };
-    } else if (parts.length === 2) result = state.queries;
+    } else if (parts.length === 2) {
+      const selected = url.searchParams.get('project_id');
+      if (selected) requireItem(state.projects, project => project.id === Number(selected), 'Search');
+      result = state.queries.filter(query => !selected || query.project_id === Number(selected)).sort((a,b) => a.version-b.version || a.id-b.id);
+    }
     else {
       const query = requireItem(state.queries, query => query.id === id, 'Query');
       if (parts[3] === 'approve' && method === 'POST') { if (query.status === 'fetching') throw new Error('This query is already fetching.'); query.status = 'approved'; result = { id, status: 'approved' }; }
