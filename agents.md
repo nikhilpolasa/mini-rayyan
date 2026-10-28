@@ -78,7 +78,7 @@ The canonical documentation folder is `docs/` (lowercase). Keep filesystem names
 
 ## 5. Data model (summary)
 
-Tables: `queries`, `records`, `query_records`, `dup_groups`, `group_members`, `criteria`, `screen_results`, `pico_spans`, `decisions`, `run_log`. Column details are in `docs/PRD.md` section 7.
+Tables: `projects`, `queries`, `records`, `query_records`, `dup_groups`, `group_members`, `criteria`, `screen_results`, `pico_spans`, `decisions`, `run_log`. Column details are in `docs/PRD.md` section 7.
 
 Constraints that must exist:
 - `records.pmid` UNIQUE; inserts are upserts.
@@ -86,8 +86,9 @@ Constraints that must exist:
 - `queries` UNIQUE (`project_id`, `version`).
 - `screen_results` UNIQUE (`record_id`, `rule_set_version`).
 - All timestamps in UTC.
-- Level 1 has one implicit project (`project_id = 1`); keep the column.
-- Level 1 has one shared workspace per configured database. Independent in-app workspaces are out of scope. Separate reviews use separate `DATABASE_URL` values or SQLite files and operator-managed instances/restarts, with no schema change. A shared judge URL does not isolate concurrent judges.
+- Approved search-thread Phase A adds `projects(id, title, created_at)` and uses the existing `queries.project_id` and `UNIQUE(project_id, version)`. New threads start at v1. Explicit parents must belong to the same thread.
+- Legacy rows, IDs, versions and parent links remain untouched in project 1, titled "Imported history (legacy)". The additive migration backs up an existing SQLite file before writes; existing PostgreSQL requires successful pg_dump backup. Never reset or renumber evidence.
+- Phase A separates search histories only. Decisions, human PICO edits, records, duplicate groups and criteria remain shared. Phase B judgment/visibility isolation is not implemented. A shared judge URL is not an isolation/security boundary; separate databases remain an operational workaround.
 
 ## 6. Pipeline behaviour
 
@@ -131,8 +132,9 @@ def to_csv(rows: list[dict]) -> str: ...
 API endpoints:
 
 ```
-POST /api/queries                 {text, date_from, date_to} -> {id, version, hit_count, translation}
-GET  /api/queries                 GET /api/queries/{id}
+GET/POST /api/projects            List/create search threads
+POST /api/queries                 {text, date_from, date_to, project_id?, parent_id?} -> {id, version, hit_count, translation}
+GET  /api/queries[?project_id=]   GET /api/queries/{id}
 POST /api/queries/{id}/approve    POST /api/queries/{id}/fetch
 POST /api/pipeline/run?query_id=
 GET  /api/records?query_id=&label=&show_hidden=&limit=&offset=
@@ -213,7 +215,7 @@ Level 1 must not block these (see PRD section 11):
 - Two records judged differently that become duplicates mark the group as **conflict** for the reviewer; never choose silently.
 - Diff view, exact revert and run log are bonus items. Do not build them until Level 1 is tagged `v1.0`.
 
-Current scope decisions are recorded in `docs/design-decisions.md`: no E7 in-app workspaces for Level 1; CC3 (multiple languages), CC4 (section metadata), CC5 (historical snapshots) and CC6 (fetch manifests) are deferred until after `v1.0`. CC1 is minimal warning display only after blocker fixes, with no broad diagnostics/schema project. Existing run logs remain supported; their presence does not establish exact historical replay.
+Current scope decisions are recorded in `docs/design-decisions.md`: E7/CC2 Phase A search threads are maintainer-approved, with Phase B explicitly not started; CC3 (multiple languages), CC4 (section metadata), CC5 (historical snapshots) and CC6 (fetch manifests) are deferred until after `v1.0`. CC1 is minimal warning display only after blocker fixes, with no broad diagnostics/schema project. Existing run logs remain supported; their presence does not establish exact historical replay.
 
 ## 12. Testing and definition of done
 
@@ -267,3 +269,5 @@ Implement <task> per the contracts in AGENTS.md section 7.
 Use fixtures in /fixtures. Write tests, run them, and do not edit files outside my folder.
 When finished, summarize the changes and the test results.
 ```
+
+Search-thread compatibility: POST queries without project_id still writes project 1 and infers its latest parent when parent_id is omitted. An explicit null parent starts without a parent. GET queries without project_id retains its existing unfiltered list; the frontend always supplies the selected project. New search creates a project, while Revise creates its next version. Scope frontend cache keys by project_id and, when present, query_id.

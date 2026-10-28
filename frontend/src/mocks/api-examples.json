@@ -1,6 +1,33 @@
 {
-  "description": "Illustrative persisted API contracts. Optional query_id on record detail and CSV selects that query's machine context; omitted selectors retain latest-context behaviour. Human decisions remain authoritative across queries. CSV response excludes its UTF-8 BOM.",
+  "description": "Illustrative persisted API contracts. Optional query_id on record detail and CSV selects that query's machine context; omitted selectors retain latest-context behaviour. Human decisions remain authoritative across queries. CSV response excludes its UTF-8 BOM. Phase A adds projects as search threads: scoped query histories only; judgments, records, duplicates and criteria remain shared. Omitting project_id on POST queries uses legacy project 1; omitting the GET filter retains the existing unfiltered list.",
   "endpoints": [
+    {
+      "method": "GET",
+      "path": "/api/projects",
+      "status_code": 200,
+      "content_type": "application/json",
+      "response": [
+        {
+          "id": 1,
+          "title": "Imported history (legacy)",
+          "created_at": "2026-10-28T00:00:00Z"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects",
+      "status_code": 200,
+      "content_type": "application/json",
+      "request": {
+        "title": "Diabetes review"
+      },
+      "response": {
+        "id": 2,
+        "title": "Diabetes review",
+        "created_at": "2026-10-28T00:01:00Z"
+      }
+    },
     {
       "method": "POST",
       "path": "/api/queries",
@@ -15,12 +42,18 @@
       "request": {
         "text": "exercise[tiab] AND sleep[tiab]",
         "date_from": "2016-01-01",
-        "date_to": "2026-10-27"
+        "date_to": "2026-10-27",
+        "project_id": 1,
+        "parent_id": null
+      },
+      "request_parameters": {
+        "project_id": "Optional positive integer; default 1. Versions increment only inside that project.",
+        "parent_id": "Optional same-project query ID. Omitted: latest within the project (legacy behaviour); explicit null: no parent."
       }
     },
     {
       "method": "GET",
-      "path": "/api/queries",
+      "path": "/api/queries?project_id=1",
       "status_code": 200,
       "content_type": "application/json",
       "response": [
@@ -43,7 +76,14 @@
           },
           "created_at": "2026-10-27T08:00:00Z"
         }
-      ]
+      ],
+      "query_parameters": {
+        "project_id": {
+          "required": false,
+          "type": "positive integer",
+          "description": "Filter history to one project. Omission preserves the unfiltered legacy GET."
+        }
+      }
     },
     {
       "method": "GET",

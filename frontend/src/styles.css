@@ -268,6 +268,15 @@ footer p { max-width: 900px; line-height: 1.8; }
 footer a { text-decoration: underline; text-underline-offset: 2px; color: #869c73; margin-left: 5px; white-space: nowrap; }
 .skip-link { position: absolute; left: -10000px; top: 12px; background: white; padding: 12px 20px; z-index: 100; }
 .skip-link:focus { left: 12px; }
+.sidebar { overflow-y: auto; }
+.search-threads { margin: 8px 0 16px; }
+.search-threads .workspace-label { margin: 10px 0; }
+.thread-list { display: grid; gap: 4px; max-height: 24vh; overflow-y: auto; margin-top: 10px; }
+.thread-link { display: block; padding: 9px 10px; border-radius: 6px; font-size: 12px; overflow-wrap: anywhere; }
+.thread-link.selected { background: #e4ecd7; color: #244f43; font-weight: 650; }
+.thread-form { padding-top: 12px; }
+.thread-form input { width: 100%; margin: 5px 0 8px; }
+.thread-form button { margin-right: 7px; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes progress { 0% { transform: translateX(-100%); } 100% { transform: translateX(400%); } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; animation-iteration-count: 1 !important; } }

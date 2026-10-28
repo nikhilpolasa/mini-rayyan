@@ -33,7 +33,7 @@ Systematic reviews need every relevant study to be found and screened. A search 
 
 **Non-goals for Level 1:** user accounts or login, multi-user collaboration, full-text PDFs, Europe PMC (stage 2, only after Level 1 works), trained ML models (only after rule baselines work), mobile layout.
 
-Independent in-app review workspaces are also out of scope for Level 1 (E7/CC2). Each configured database is one shared workspace. For separate reviews, use separate `DATABASE_URL` values or SQLite files with operator-managed instances/restarts; no schema change or automatic per-session routing is planned. Judges sharing one URL/database can affect each other's review state; this is a known limitation (M3). Organizer access arrangements remain OPEN.
+Maintainer-approved E7/CC2 Phase A adds search threads within the database, with separate query histories and version counters. It does not isolate judgments: decisions, notes, human PICO edits, duplicate groups and criteria are still shared. Phase B is not implemented. Judges sharing one URL/database can still affect each other; no login/session security is promised (M3). Organizer access arrangements remain OPEN.
 
 The canonical documentation folder is `docs/` (lowercase), including this PRD and `docs/design-decisions.md`.
 
@@ -170,6 +170,7 @@ Approved H1 behaviour: after a human record Include is committed, run record-onl
 
 | Table | Columns (main) |
 |---|---|
+| `projects` | id, title, created_at (UTC). Search-thread metadata; project 1 is "Imported history (legacy)". |
 | `queries` | id, project_id (default 1), version, parent_id, text, date_from, date_to, hit_count, query_translation, status (saved, approved, fetching, fetched, failed), created_at. UNIQUE(project_id, version). |
 | `records` | id, pmid UNIQUE, doi, title, abstract, authors_json, year, journal, language, pub_types_json, mesh_json, source, fetched_at |
 | `query_records` | query_id, record_id, found_at. PK(query_id, record_id) |
@@ -181,16 +182,20 @@ Approved H1 behaviour: after a human record Include is committed, run record-onl
 | `decisions` | id, entity_type (record, group, pair, pico_span, criterion), entity_id, action, old_value, new_value, note, actor, created_at |
 | `run_log` | id, query_id, step, rule_set_version, status, counts_json, started_at, finished_at |
 
-Level 1 uses one implicit project (`project_id = 1`); keep the column so Level 2 needs no rebuild. Store all timestamps in UTC.
+Phase A uses the existing project_id column to allocate versions per search thread. Legacy data remains in project 1 without changing any ID, version or parent link. Store all timestamps in UTC.
 
-One configured database remains one shared review workspace. Separate reviews use separate databases/files, preserving previous evidence; no E7 schema migration or project API is part of Level 1.
+Run `scripts/migrate_add_projects.py` with the backend stopped. It adds only project metadata, is idempotent and reports changed tables/inserted project IDs and the backup path. Before writes, existing SQLite files are backed up with SQLite backup (including WAL contents); existing PostgreSQL requires pg_dump. A failed backup stops migration. Startup uses the same backup-before-write path. No populated database is reset, and no existing table column or row is rewritten.
+
+This is search-history separation, not Phase B judgment separation. Criteria remain global. Duplicate representative visibility is still the existing global projection; a record linked to another thread can affect grouping/visibility. These are explicit Phase A limitations, not claims of implemented isolation.
 
 ## 8. API contract
 
 | Endpoint | Purpose |
 |---|---|
-| `POST /api/queries` `{text, date_from, date_to}` | Save as next version; returns `{id, version, hit_count, translation}` |
-| `GET /api/queries` | List versions |
+| `GET /api/projects` | List search threads newest first |
+| `POST /api/projects` `{title}` | Create a titled thread; returns id, title, created_at |
+| `POST /api/queries` `{text, date_from, date_to, project_id?, parent_id?}` | Save as the next version in that project; returns `{id, version, hit_count, translation}` |
+| `GET /api/queries` with optional `project_id` | Filter versions to one thread when supplied. Omission preserves the legacy unfiltered list. |
 | `GET /api/queries/{id}` | Detail, status, counts |
 | `POST /api/queries/{id}/approve` | Mark approved for pulling |
 | `POST /api/queries/{id}/fetch` | Start background pull |
@@ -207,7 +212,9 @@ One configured database remains one shared review workspace. Separate reviews us
 
 Example JSON for each endpoint lives in `docs/api-examples.json`. The frontend mocks from it.
 
-CC7 is limited to these optional query selectors and corresponding frontend links/cache keys. No `run_id` selector, current-version pointer, workspace API or table column is added. Human decisions remain authoritative within the configured database.
+CC7 remains the optional query selector, not a historical run selector. Separately approved Phase A adds only project metadata and optional query-create project/parent inputs. POST omission uses project 1 and its latest parent; explicit null parent is permitted. A cross-project parent is rejected. Existing responses remain unchanged.
+
+The sidebar lists threads newest first; New search creates a thread at v1; Revise creates the next version inside it. The route carries project_id (and optional query_id) and every query cache key includes that scope. A long sentence without Boolean operators or field tags receives a frontend-only, non-blocking keyword warning. This does not convert natural language to PubMed syntax.
 
 ## 9. Module contracts
 

@@ -277,7 +277,7 @@ def _screen_context(session: Session, query: m.Query):
     criteria = list(
         session.scalars(
             select(m.Criterion)
-            .where(m.Criterion.project_id == query.project_id)
+            .where(m.Criterion.project_id == 1)  # Criteria remain global in Phase A/B.
             .order_by(m.Criterion.key)
         )
     )

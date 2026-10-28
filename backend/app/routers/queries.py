@@ -1,6 +1,6 @@
 """Immutable query versions and approval-gated background fetching."""
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from .. import models as m, schemas as s
@@ -14,6 +14,12 @@ router = APIRouter(prefix="/api/queries", tags=["queries"])
 def create_query(body: s.QueryCreate, db: DB):
     if not body.text.strip():
         raise HTTPException(422, "Query text must not be blank")
+    project_id = body.project_id or 1
+    require(db, m.Project, project_id)
+    if body.parent_id is not None:
+        parent = require(db, m.Query, body.parent_id)
+        if parent.project_id != project_id:
+            raise HTTPException(422, "Parent query must belong to the same search")
     try:
         with pipeline.source_client() as client:
             count = client.search_count(body.text, body.date_from, body.date_to)
@@ -26,14 +32,18 @@ def create_query(body: s.QueryCreate, db: DB):
         for attempt in range(3):
             latest = db.scalar(
                 select(m.Query)
-                .where(m.Query.project_id == 1)
+                .where(m.Query.project_id == project_id)
                 .order_by(m.Query.version.desc())
                 .limit(1)
             )
             query = m.Query(
-                project_id=1,
+                project_id=project_id,
                 version=latest.version + 1 if latest else 1,
-                parent_id=latest.id if latest else None,
+                parent_id=(
+                    body.parent_id
+                    if "parent_id" in body.model_fields_set
+                    else latest.id if latest else None
+                ),
                 text=body.text,
                 date_from=body.date_from,
                 date_to=body.date_to,
@@ -52,11 +62,12 @@ def create_query(body: s.QueryCreate, db: DB):
 
 
 @router.get("", response_model=list[s.QueryDetail])
-def list_queries(db: DB):
-    return [
-        query_detail(db, query)
-        for query in db.scalars(select(m.Query).order_by(m.Query.version))
-    ]
+def list_queries(db: DB, project_id: int | None = Query(default=None, gt=0)):
+    statement = select(m.Query).order_by(m.Query.version, m.Query.id)
+    if project_id is not None:
+        require(db, m.Project, project_id)
+        statement = statement.where(m.Query.project_id == project_id)
+    return [query_detail(db, query) for query in db.scalars(statement)]
 
 
 @router.get("/{id}", response_model=s.QueryDetail)

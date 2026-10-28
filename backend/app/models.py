@@ -8,6 +8,14 @@ from sqlalchemy.orm import Mapped, mapped_column
 from .db import Base, UTCDateTime, utc_now
 
 
+class Project(Base):
+    __tablename__ = "projects"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utc_now)
+
+
 class Query(Base):
     __tablename__ = "queries"
     __table_args__ = (

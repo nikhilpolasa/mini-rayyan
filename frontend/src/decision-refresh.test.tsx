@@ -8,10 +8,10 @@ import type { DecisionInput } from './types';
 
 // Begin list/log reads, save a decision, then deliver the older snapshots.
 function Review({ input, recordId }: { input: DecisionInput; recordId: number }) {
-  const records = useQuery({ queryKey: ['records', { show_hidden: true }], queryFn: ({ signal }) => api.records({ show_hidden: true }, signal) });
-  const record = useQuery({ queryKey: ['record', recordId], queryFn: ({ signal }) => api.record(recordId, signal) });
-  const log = useQuery({ queryKey: ['decisions'], queryFn: ({ signal }) => api.decisions(signal) });
-  const duplicates = useQuery({ queryKey: ['duplicates'], queryFn: ({ signal }) => api.duplicates(signal) });
+  const records = useQuery({ queryKey: ['records', 1, { show_hidden: true }], queryFn: ({ signal }) => api.records({ show_hidden: true }, signal) });
+  const record = useQuery({ queryKey: ['record', 1, recordId, null], queryFn: ({ signal }) => api.record(recordId, signal) });
+  const log = useQuery({ queryKey: ['decisions', 1], queryFn: ({ signal }) => api.decisions(signal) });
+  const duplicates = useQuery({ queryKey: ['duplicates', 1], queryFn: ({ signal }) => api.duplicates(signal) });
   const action = useAction(api.decide);
   return <>
     <button onClick={() => action.mutate(input)}>Save decision</button>

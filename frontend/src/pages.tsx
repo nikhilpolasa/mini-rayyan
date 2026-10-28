@@ -1,34 +1,39 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, isMockMode } from './api';
-import { Badge, Empty, Feedback, Icon, LoadState, PageHeading, PicoAbstract, dateText, picoLabels, useAction, useQueryContext, queryLink } from './components';
+import { Badge, Empty, Feedback, Icon, LoadState, PageHeading, PicoAbstract, dateText, picoLabels, useAction, useQueryContext, useProjectContext, queryLink } from './components';
 import type { DecisionInput, Label, PicoSpan, QueryInput, QueryVersion } from './types';
 
 export function QueriesPage() {
+  const projectId = useProjectContext();
   const queryClient = useQueryClient();
-  const queries = useQuery({ queryKey: ['queries'], queryFn: ({ signal }) => api.queries(signal), refetchInterval: query => query.state.data?.some(item => item.status === 'fetching') ? 1200 : false });
-  const runs = useQuery({ queryKey: ['runs'], queryFn: ({ signal }) => api.runs(undefined, signal), refetchInterval: query => query.state.data?.some(item => ['queued', 'running'].includes(item.status)) ? 1200 : false });
+  const queries = useQuery({ queryKey: ['queries', projectId], queryFn: ({ signal }) => api.queries(signal, projectId), refetchInterval: query => query.state.data?.some(item => item.status === 'fetching') ? 1200 : false });
+  const runs = useQuery({ queryKey: ['runs', projectId], queryFn: ({ signal }) => api.runs(undefined, signal), refetchInterval: query => query.state.data?.some(item => ['queued', 'running'].includes(item.status)) ? 1200 : false });
   const [form, setForm] = useState<QueryInput>({ text: '', date_from: '2016-01-01', date_to: new Date().toISOString().slice(0, 10) });
   const [formError, setFormError] = useState('');
+  const [parentId, setParentId] = useState<number | null>(null);
+  const sentenceWarning = form.text.trim().split(/\s+/).length > 6 && !/\[[^\]]+\]/.test(form.text) && !/\b(?:AND|OR|NOT)\b/i.test(form.text);
   const save = useAction(api.createQuery);
   const action = useAction(async ({ type, id }: { type: 'approve' | 'pull' | 'pipeline'; id: number }) => api[type](id));
-  const completed = runs.data?.filter(run => ['completed', 'failed'].includes(run.status)).map(run => `${run.id}:${run.status}`).join(',');
-  useEffect(() => { if (completed) void queryClient.invalidateQueries({ queryKey: ['queries'] }); }, [completed, queryClient]);
+  const projectRuns = runs.data?.filter(run => queries.data?.some(query => query.id === run.query_id));
+  const completed = projectRuns?.filter(run => ['completed', 'failed'].includes(run.status)).map(run => `${run.id}:${run.status}`).join(',');
+  useEffect(() => { if (completed) void queryClient.invalidateQueries({ queryKey: ['queries', projectId] }); }, [completed, queryClient]);
 
   function submit(event: FormEvent) {
     event.preventDefault(); setFormError('');
     if (!form.text.trim()) { setFormError('Enter a search query.'); return; }
     if (form.date_to < form.date_from) { setFormError('The end date must be on or after the start date.'); return; }
-    save.mutate(form);
+    save.mutate({ ...form, project_id: projectId, parent_id: parentId }, { onSuccess: created => setParentId(created.id) });
   }
   const versions = queries.data ?? [];
-  const running = runs.data?.some(run => ['queued', 'running'].includes(run.status));
+  const running = projectRuns?.some(run => ['queued', 'running'].includes(run.status));
   return <>
     <PageHeading eyebrow="01 / FIND THE EVIDENCE" title="A good review starts with a question.">Search PubMed, compare versions, and bring the right evidence into focus.</PageHeading>
     <div className="query-layout">
-      <section className="panel search-panel"><div className="section-title"><span className="icon-tile"><Icon name="search"/></span><div><h2>New search</h2><p>Your question, in PubMed’s language.</p></div></div>
+      <section className="panel search-panel"><div className="section-title"><span className="icon-tile"><Icon name="search"/></span><div><h2>{parentId ? 'Revise query' : 'Search query'}</h2><p>Your question, in PubMed’s language.</p></div></div>
         <form onSubmit={submit}><label htmlFor="query-text">Search query</label><textarea id="query-text" required rows={4} value={form.text} onChange={event => setForm({ ...form, text: event.target.value })} placeholder={'e.g. intervention[tiab] AND outcome[tiab]'}/><p className="field-hint">Combine concepts with AND, OR and NOT. PubMed field tags are supported.</p>
           <div className="form-row"><div><label htmlFor="date-from">Published from</label><input id="date-from" type="date" required value={form.date_from} onChange={event => setForm({ ...form, date_from: event.target.value })}/></div><div><label htmlFor="date-to">Published to</label><input id="date-to" type="date" required min={form.date_from} value={form.date_to} onChange={event => setForm({ ...form, date_to: event.target.value })}/></div></div>
+          {sentenceWarning && <p className="notice" role="status">PubMed needs keywords or a Boolean query rather than a full question. You can still continue.</p>}
           {formError && <p role="alert" className="notice notice-error">{formError}</p>}<Feedback action={save} success={save.data ? `Saved as version ${save.data.version} · ${save.data.hit_count.toLocaleString()} PubMed hits${isMockMode() ? ' (example count)' : ''}.` : undefined}/>
           <div className="form-bottom"><span><Icon name="history" size={15}/> Every search is a new version.</span><button className="btn btn-primary" disabled={save.isPending}>{save.isPending ? <span className="spinner"/> : <Icon name="plus" size={17}/>} {save.isPending ? 'Searching PubMed…' : 'Save & check hits'}</button></div>
         </form>
@@ -39,31 +44,33 @@ export function QueriesPage() {
     <LoadState pending={queries.isPending || runs.isPending} error={queries.error ?? runs.error} retry={() => { void queries.refetch(); void runs.refetch(); }}/><Feedback action={action} success={action.data ? 'Request accepted. Status updates automatically.' : undefined}/>
     {!queries.isPending && !queries.error && !versions.length && <section className="panel"><Empty title="Your first search starts here">Save a query above to see its hit count and PubMed translation.</Empty></section>}
     <div className="version-list">{[...versions].reverse().map(query => {
-      const latestRun = [...(runs.data ?? [])].reverse().find(run => run.query_id === query.id);
+      const latestRun = [...(projectRuns ?? [])].reverse().find(run => run.query_id === query.id);
+      const parent = versions.find(version => version.id === query.parent_id);
       const busy = query.status === 'fetching' || latestRun && ['running', 'queued'].includes(latestRun.status);
       return <article className="panel version-card" key={query.id}><div className="version-top"><div className="version-meta"><span className="version-number">v{query.version}</span><span className={`status status-${query.status}`}>{query.status}</span><span className="muted">{dateText(query.created_at)}</span></div><div className="hit-count"><strong>{query.hit_count.toLocaleString()}</strong> hits <span>on PubMed{isMockMode() ? ' · example' : ''}</span></div></div>
-        <h3 className="query-expression">{query.text}</h3><div className="version-subline"><span>{query.date_from} → {query.date_to}</span><span>{query.counts.records ?? 0} linked records</span>{query.parent_id && <span>Based on query #{query.parent_id}</span>}</div>
+        <h3 className="query-expression">{query.text}</h3><div className="version-subline"><span>{query.date_from} → {query.date_to}</span><span>{query.counts.records ?? 0} linked records</span>{parent && <span>Based on v{parent.version}</span>}</div>
         <details className="translation"><summary>PubMed querytranslation</summary><code>{query.translation || 'No translation returned.'}</code></details>
         {busy && <div className="job-progress" role="status"><div className="progress-track"><div/></div><p>{latestRun?.step === 'pipeline' ? 'Deduplicating → screening → tagging PICO' : 'Pulling abstracts in the background'} · elapsed time and counts appear below.</p></div>}
         {latestRun?.status === 'failed' && <p className="notice notice-error" role="alert">The {latestRun.step} job failed. For a fetch failure, approve this query again and retry. Check source availability if the problem continues.</p>}
         {latestRun?.status === 'completed' && <p className="run-summary"><Icon name="check" size={15}/>{latestRun.step} completed{latestRun.counts.seconds !== undefined ? ` in ${latestRun.counts.seconds}s` : ''}{latestRun.counts.records_in !== undefined ? ` · ${latestRun.counts.records_in} records processed` : ''}</p>}
-        <div className="version-actions"><button className="btn btn-small" disabled={action.isPending || !!busy || query.status === 'approved' || query.status === 'fetched'} onClick={() => action.mutate({ type: 'approve', id: query.id })}><Icon name="check" size={15}/> Approve</button><button className="btn btn-small btn-primary" disabled={action.isPending || !!busy || !['approved', 'fetched'].includes(query.status)} onClick={() => action.mutate({ type: 'pull', id: query.id })}><Icon name="download" size={15}/> Pull abstracts</button><button className="btn btn-small" disabled={action.isPending || !!busy || query.status !== 'fetched'} onClick={() => action.mutate({ type: 'pipeline', id: query.id })}>Run pipeline <Icon name="arrow" size={15}/></button><button className="text-button clone-button" onClick={() => { setForm({ text: query.text, date_from: query.date_from, date_to: query.date_to }); document.getElementById('query-text')?.focus(); }}>Clone into new search</button></div>
+        <div className="version-actions"><button className="btn btn-small" disabled={action.isPending || !!busy || query.status === 'approved' || query.status === 'fetched'} onClick={() => action.mutate({ type: 'approve', id: query.id })}><Icon name="check" size={15}/> Approve</button><button className="btn btn-small btn-primary" disabled={action.isPending || !!busy || !['approved', 'fetched'].includes(query.status)} onClick={() => action.mutate({ type: 'pull', id: query.id })}><Icon name="download" size={15}/> Pull abstracts</button><button className="btn btn-small" disabled={action.isPending || !!busy || query.status !== 'fetched'} onClick={() => action.mutate({ type: 'pipeline', id: query.id })}>Run pipeline <Icon name="arrow" size={15}/></button><button className="text-button clone-button" onClick={() => { setForm({ text: query.text, date_from: query.date_from, date_to: query.date_to }); setParentId(query.id); document.getElementById('query-text')?.focus(); }}>Revise (new version)</button></div>
       </article>;
     })}</div>
   </>;
 }
 
 export function RecordsPage() {
+  const projectId = useProjectContext();
   const queryId = useQueryContext();
   const [label, setLabel] = useState(''), [hidden, setHidden] = useState(false), [limit, setLimit] = useState(25), [offset, setOffset] = useState(0);
-  const queries = useQuery({ queryKey: ['queries'], queryFn: ({ signal }) => api.queries(signal) });
+  const queries = useQuery({ queryKey: ['queries', projectId], queryFn: ({ signal }) => api.queries(signal, projectId) });
   const filters = { query_id: queryId, label: label ? label as Label : undefined, show_hidden: hidden, limit, offset };
-  const records = useQuery({ queryKey: ['records', filters], queryFn: ({ signal }) => api.records(filters, signal), refetchInterval: 5000 });
+  const records = useQuery({ queryKey: ['records', projectId, filters], queryFn: ({ signal }) => api.records(filters, signal), refetchInterval: 5000 });
   function filter(action: () => void) { action(); setOffset(0); }
   return <><PageHeading eyebrow="02 / SCREEN & REVIEW" title="Every record deserves a clear decision.">Read the evidence, understand the reason, and keep the final say.</PageHeading>
-    <section className="panel"><div className="filter-bar"><div><label htmlFor="version-filter">Query version</label><select id="version-filter" value={queryId ?? ''} onChange={event => filter(() => { window.location.hash = queryLink('/records', event.target.value ? Number(event.target.value) : undefined); })}><option value="">All query versions</option>{queries.data?.map(query => <option key={query.id} value={query.id}>Version {query.version} · {query.text.slice(0, 38)}</option>)}</select></div><div><label htmlFor="label-filter">Screening label</label><select id="label-filter" value={label} onChange={event => filter(() => setLabel(event.target.value))}><option value="">All labels</option><option value="include">Include</option><option value="exclude">Exclude</option><option value="maybe">Maybe</option></select></div><label className="check-label"><input type="checkbox" checked={hidden} onChange={event => filter(() => setHidden(event.target.checked))}/> Show hidden duplicates</label></div>
+    <section className="panel"><div className="filter-bar"><div><label htmlFor="version-filter">Query version</label><select id="version-filter" value={queryId ?? ''} onChange={event => filter(() => { window.location.hash = queryLink('/records', event.target.value ? Number(event.target.value) : undefined, projectId); })}><option value="">All stored records (shared)</option>{queries.data?.map(query => <option key={query.id} value={query.id}>Version {query.version} · {query.text.slice(0, 38)}</option>)}</select></div><div><label htmlFor="label-filter">Screening label</label><select id="label-filter" value={label} onChange={event => filter(() => setLabel(event.target.value))}><option value="">All labels</option><option value="include">Include</option><option value="exclude">Exclude</option><option value="maybe">Maybe</option></select></div><label className="check-label"><input type="checkbox" checked={hidden} onChange={event => filter(() => setHidden(event.target.checked))}/> Show hidden duplicates</label></div>
       <LoadState pending={records.isPending} error={records.error ?? queries.error} retry={() => { void records.refetch(); void queries.refetch(); }}/>
-      {records.data && <><div className="table-caption"><strong>{records.data.total} matching records</strong><span>Labels reflect the latest human override.</span></div><div className="table-scroll"><table><thead><tr><th>STUDY</th><th>SCREENING</th><th>REASON & SOURCE</th><th><span className="sr-only">Open record</span></th></tr></thead><tbody>{records.data.items.map(record => <tr key={record.id} className={record.hidden_duplicate ? 'hidden-record' : ''}><td><a className="record-title" href={queryLink(`/records/${record.id}`, queryId)}>{record.title || 'Untitled record'}</a><div className="record-meta">{record.journal ?? 'Journal unavailable'} · {record.year ?? 'Year unavailable'}<br/><span>PMID {record.pmid}</span>{record.hidden_duplicate && <span className="hidden-pill">Hidden duplicate</span>}</div></td><td><Badge label={record.label}/></td><td><p className="reason-text">{record.reason || 'No reason supplied.'}</p><span className={`source source-${record.source}`}>{record.source === 'human' ? 'Reviewer override' : 'Machine result'}</span>{record.criterion && <small className="criterion-key">{record.criterion}</small>}</td><td><a className="row-open" href={queryLink(`/records/${record.id}`, queryId)} aria-label={`Review ${record.title}`}><Icon name="arrow"/></a></td></tr>)}</tbody></table></div>
+      {records.data && <><div className="table-caption"><strong>{records.data.total} matching records</strong><span>Labels reflect the latest human override.</span></div><div className="table-scroll"><table><thead><tr><th>STUDY</th><th>SCREENING</th><th>REASON & SOURCE</th><th><span className="sr-only">Open record</span></th></tr></thead><tbody>{records.data.items.map(record => <tr key={record.id} className={record.hidden_duplicate ? 'hidden-record' : ''}><td><a className="record-title" href={queryLink(`/records/${record.id}`, queryId, projectId)}>{record.title || 'Untitled record'}</a><div className="record-meta">{record.journal ?? 'Journal unavailable'} · {record.year ?? 'Year unavailable'}<br/><span>PMID {record.pmid}</span>{record.hidden_duplicate && <span className="hidden-pill">Hidden duplicate</span>}</div></td><td><Badge label={record.label}/></td><td><p className="reason-text">{record.reason || 'No reason supplied.'}</p><span className={`source source-${record.source}`}>{record.source === 'human' ? 'Reviewer override' : 'Machine result'}</span>{record.criterion && <small className="criterion-key">{record.criterion}</small>}</td><td><a className="row-open" href={queryLink(`/records/${record.id}`, queryId, projectId)} aria-label={`Review ${record.title}`}><Icon name="arrow"/></a></td></tr>)}</tbody></table></div>
         {!records.data.items.length && <Empty title="No records match these filters">Try another label or query version, or show hidden duplicates.</Empty>}
         <div className="pagination"><span>{records.data.total ? `${offset + 1}–${Math.min(offset + limit, records.data.total)}` : '0'} of {records.data.total}</span><div><label htmlFor="page-size">Per page</label><select id="page-size" value={limit} onChange={event => filter(() => setLimit(Number(event.target.value)))}>{[10, 25, 50, 100].map(size => <option key={size} value={size}>{size}</option>)}</select><button className="btn btn-small" disabled={offset === 0 || records.isFetching} onClick={() => setOffset(Math.max(0, offset - limit))}>Previous</button><button className="btn btn-small" disabled={offset + limit >= records.data.total || records.isFetching} onClick={() => setOffset(offset + limit)}>Next</button></div></div>
       </>}
@@ -71,8 +78,9 @@ export function RecordsPage() {
 }
 
 export function RecordPageView({ id }: { id: number }) {
+  const projectId = useProjectContext();
   const queryId = useQueryContext();
-  const record = useQuery({ queryKey: ['record', id, queryId ?? null], queryFn: ({ signal }) => api.record(id, signal, queryId) });
+  const record = useQuery({ queryKey: ['record', projectId, id, queryId ?? null], queryFn: ({ signal }) => api.record(id, signal, queryId) });
   const action = useAction(api.decide);
   const [note, setNote] = useState('');
   const [tag, setTag] = useState<{ label: PicoSpan['label']; start: number; end: number }>({ label: 'P', start: 0, end: 6 });
@@ -81,7 +89,7 @@ export function RecordPageView({ id }: { id: number }) {
   const tagValid = Number.isInteger(tag.start) && Number.isInteger(tag.end) && tag.start >= 0 && tag.end > tag.start && tag.end <= chars.length;
   const latest = data?.decisions.some(decision => decision.entity_type === 'record' && String(decision.entity_id) === String(id));
   function decide(input: DecisionInput) { action.mutate(input, { onSuccess: () => setNote('') }); }
-  return <><a className="back-link" href={queryLink('/records', queryId)}>← Back to records</a><LoadState pending={record.isPending} error={record.error} retry={record.refetch}/>
+  return <><a className="back-link" href={queryLink('/records', queryId, projectId)}>← Back to records</a><LoadState pending={record.isPending} error={record.error} retry={record.refetch}/>
     {data && <><PageHeading eyebrow={`RECORD ${data.id} / PMID ${data.pmid}`} title={data.title || 'Untitled record'}>{data.authors.join(', ') || 'Authors unavailable'} · {data.journal ?? 'Journal unavailable'} · {data.year ?? 'Year unavailable'}</PageHeading>
       <div className="detail-layout"><div><section className="panel abstract-panel"><div className="section-heading compact"><h2>Abstract</h2><div className="pico-legend">{Object.entries(picoLabels).map(([key, value]) => <span key={key}><i className={`pico-${key}`}/>{value}</span>)}</div></div>{data.abstract ? <PicoAbstract text={data.abstract} spans={data.pico_spans}/> : <Empty title="No abstract available">Review the available metadata before making a decision.</Empty>}
         <div className="metadata-row"><span>Language: {data.language ?? 'Unknown'}</span><span>{data.pub_types.join(' · ') || 'Publication type unavailable'}</span></div>
@@ -103,7 +111,8 @@ export function RecordPageView({ id }: { id: number }) {
 }
 
 export function DuplicatesPage() {
-  const duplicates = useQuery({ queryKey: ['duplicates'], queryFn: ({ signal }) => api.duplicates(signal) });
+  const projectId = useProjectContext();
+  const duplicates = useQuery({ queryKey: ['duplicates', projectId], queryFn: ({ signal }) => api.duplicates(signal) });
   const action = useAction(api.decide);
   const [note, setNote] = useState('');
   const data = duplicates.data;
@@ -119,7 +128,8 @@ export function DuplicatesPage() {
 }
 
 export function CriteriaPage() {
-  const criteria = useQuery({ queryKey: ['criteria'], queryFn: ({ signal }) => api.criteria(signal) });
+  const projectId = useProjectContext();
+  const criteria = useQuery({ queryKey: ['criteria', projectId], queryFn: ({ signal }) => api.criteria(signal) });
   const action = useAction(({ key, active }: { key: string; active: boolean }) => api.toggleCriterion(key, active));
   return <><PageHeading eyebrow="04 / MAKE THE RULES EXPLICIT" title="A review with reasons you can see.">Choose your active screening criteria. Every toggle is recorded in the decision log.</PageHeading><div className="notice">After changing criteria, run the pipeline again from Queries. Human overrides remain intact.</div><LoadState pending={criteria.isPending} error={criteria.error} retry={criteria.refetch}/><Feedback action={action} success="Criterion updated and logged."/>
     {criteria.data?.length === 0 && <section className="panel"><Empty title="No criteria configured">Ask the backend maintainer to load the review’s criteria.</Empty></section>}
@@ -128,8 +138,9 @@ export function CriteriaPage() {
 }
 
 export function ExportPage() {
+  const projectId = useProjectContext();
   const queryId = useQueryContext();
-  const included = useQuery({ queryKey: ['records', 'export-preview', queryId ?? null], queryFn: ({ signal }) => api.records({ query_id: queryId, label: 'include', limit: 1 }, signal) });
+  const included = useQuery({ queryKey: ['records', projectId, 'export-preview', queryId ?? null], queryFn: ({ signal }) => api.records({ query_id: queryId, label: 'include', limit: 1 }, signal) });
   const [downloaded, setDownloaded] = useState(false);
   const download = useAction(async () => {
     const blob = await api.exportCsv(queryId);
@@ -142,7 +153,8 @@ export function ExportPage() {
 }
 
 export function DecisionsPage() {
-  const decisions = useQuery({ queryKey: ['decisions'], queryFn: ({ signal }) => api.decisions(signal) });
+  const projectId = useProjectContext();
+  const decisions = useQuery({ queryKey: ['decisions', projectId], queryFn: ({ signal }) => api.decisions(signal) });
   const action = useAction(api.decide);
   return <><PageHeading eyebrow="06 / KEEP THE REASONING" title="A history you can stand behind.">Every reviewer change, in order. Undo adds a new entry; the original stays intact.</PageHeading><LoadState pending={decisions.isPending} error={decisions.error} retry={decisions.refetch}/><Feedback action={action} success="Undo recorded as a new decision."/>
     {decisions.data && <section className="panel"><div className="table-caption"><strong>{decisions.data.length} logged decisions</strong><span>Append-only audit history</span></div>{!decisions.data.length ? <Empty title="Your decision log starts with your first review">Overrides, notes, criteria changes and annotation edits appear here.</Empty> : <div className="table-scroll"><table className="audit-table"><thead><tr><th>WHEN / WHO</th><th>ENTITY / ACTION</th><th>CHANGE / NOTE</th><th/></tr></thead><tbody>{[...decisions.data].reverse().map(decision => {
