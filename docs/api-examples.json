@@ -29,6 +29,36 @@
       }
     },
     {
+      "method": "GET",
+      "path": "/api/queries/1/as-of",
+      "status_code": 200,
+      "content_type": "application/json",
+      "response": {
+        "query_id": 1,
+        "record_ids": [1, 2],
+        "groups": [{"representative_record_id": 1, "members": [1, 2], "hidden": [2]}],
+        "effective_labels": {"1": {"label": "include", "reason": "matches all query concepts", "criterion": "", "source": "machine"}},
+        "state_hash": "SHA-256 of sorted record IDs and group structure"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/queries/1/diff?base=1",
+      "status_code": 200,
+      "content_type": "application/json",
+      "response": {
+        "query_id": 1,
+        "base_query_id": 1,
+        "records_added": [],
+        "records_removed": [],
+        "records_common": [1, 2],
+        "groups_newly_merged": [],
+        "counts": {"added": 0, "removed": 0, "common": 2, "groups_newly_merged": 0},
+        "added_effective_labels": {},
+        "common_with_human_decision": []
+      }
+    },
+    {
       "method": "POST",
       "path": "/api/queries",
       "status_code": 200,

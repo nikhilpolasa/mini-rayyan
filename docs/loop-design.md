@@ -42,6 +42,25 @@ The in-process queue does not survive restart; use one worker and inspect/recove
 interrupted jobs before retrying. Increment algorithm versions when replacing
 cached stubs; otherwise old outputs may be reused incorrectly.
 
-Exact revert, query-version diff views, durable job recovery and incremental
-processing of externally updated abstracts are Level 2 work. Stored provenance
-supports them, but their presence in this design is not a claim of implementation.
+## Stored-data diff and as-of view
+
+A query version's record set is exactly the records linked to it in
+`query_records`. Existing link rows are immutable and records are never
+deleted, so the stored set can be recomputed. A later pull of the same query
+can append links, so the set is stable only after fetching is finished. Groups
+"as of" a version are recomputed from that
+set with the current deterministic matching thresholds and guards, and human
+pair decisions only when both members are inside the set. This is a read-only
+projection; each group ID is its lowest record ID (the representative).
+`GET /api/queries/{id}/as-of` returns IDs, groups, hidden members, effective
+labels and a SHA-256 hash of sorted record IDs and group structure.
+`GET /api/queries/{id}/diff?base={other_id}` compares linked sets and reports
+added/removed/common records and newly merged groups. The default base is the
+query parent. An empty diff has no additions, removals or merges.
+
+**Limit:** exact revert means the same stored record set and recomputed groups
+under the same matching rules and pair decisions. A later pair decision or
+rule change can change a prior version's projected groups; labels can change
+after human decisions. Fresh live searches can return different IDs later, so
+this is not a frozen-source replay. Durable job recovery and incremental
+processing of externally updated abstracts remain future Level 2 work.

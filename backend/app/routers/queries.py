@@ -1,12 +1,11 @@
 """Immutable query versions and approval-gated background fetching."""
 
 import os
-
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from .. import models as m, schemas as s
-from ..services import pipeline
+from ..services import pipeline, versioning
 from ._common import DB, require, query_created, query_detail
 
 router = APIRouter(prefix="/api/queries", tags=["queries"])
@@ -75,6 +74,24 @@ def list_queries(db: DB, project_id: int | None = Query(default=None, gt=0)):
 @router.get("/{id}", response_model=s.QueryDetail)
 def get_query(id: int, db: DB):
     return query_detail(db, require(db, m.Query, id))
+
+
+@router.get("/{id}/as-of")
+def query_as_of(id: int, db: DB):
+    require(db, m.Query, id)
+    return versioning.as_of(db, id)
+
+
+@router.get("/{id}/diff")
+def query_diff(id: int, db: DB, base: int | None = Query(default=None, gt=0)):
+    query = require(db, m.Query, id)
+    base_id = base if base is not None else query.parent_id
+    if base_id is None:
+        raise HTTPException(400, "This query has no parent; supply a base query ID")
+    baseline = require(db, m.Query, base_id)
+    if baseline.project_id != query.project_id:
+        raise HTTPException(422, "Base query must belong to the same search")
+    return versioning.diff(db, id, base_id)
 
 
 @router.post("/{id}/approve", response_model=s.QueryApproval)

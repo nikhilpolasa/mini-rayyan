@@ -52,6 +52,40 @@ def components(
     return [sorted(group) for group in groups if len(group) > 1]
 
 
+def compute_groups(
+    records: list[dict], rejected_pairs: set[tuple[int, int]], confirmed_pairs: set[tuple[int, int]]
+) -> list[dict]:
+    """Pure deterministic grouping over exactly these records, including singletons."""
+    by_id = {record["id"]: record for record in records}
+    ids = sorted(by_id)
+    rejected = {tuple(sorted(pair)) for pair in rejected_pairs if set(pair) <= set(ids)}
+    confirmed = {tuple(sorted(pair)) for pair in confirmed_pairs if set(pair) <= set(ids)}
+    edges = {}
+    for a, b in combinations(ids, 2):
+        pair = (a, b)
+        result = matching.pair_score(by_id[a], by_id[b])
+        if pair in confirmed or (
+            pair not in rejected
+            and (result["match_type"] == "exact" or result["score"] >= AUTO_THRESHOLD)
+        ):
+            edges[pair] = result
+    groups = [{id} for id in ids]
+    for a, b in sorted(edges):
+        left = next(group for group in groups if a in group)
+        right = next(group for group in groups if b in group)
+        if left is right:
+            continue
+        merged = left | right
+        if any(set(pair) <= merged for pair in rejected):
+            continue
+        groups.remove(right)
+        left.update(right)
+    return [
+        {"representative_record_id": min(group), "members": sorted(group), "hidden": sorted(group - {min(group)})}
+        for group in sorted(groups, key=min)
+    ]
+
+
 def build_groups(session: Session, run: m.RunLog) -> dict:
     """Score all stored pairs and reuse identical machine groups for this version."""
     records = list(session.scalars(select(m.Record).order_by(m.Record.id)))
