@@ -110,6 +110,7 @@ input::placeholder, textarea::placeholder { color: #a2ab9b; }
 summary { width: fit-content; padding: 3px 0; }
 .translation code { display: block; background: #f3f6ef; padding: 12px; border: 1px solid #e6ebdf; border-radius: 5px; margin-top: 6px; font-size: 11px; }
 .version-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; padding-top: 14px; margin-top: 13px; border-top: 1px solid #eef1e8; }
+.version-actions select { width: auto; font-size: 11px; padding: 7px 9px; }
 .clone-button { margin-left: auto; font-size: 10px; }
 .job-progress { margin: 17px 0; }
 .job-progress p { font-size: 11px; color: #7b8a70; margin-top: 7px; }

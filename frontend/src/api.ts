@@ -38,7 +38,7 @@ export const api = {
   query: (id: number, signal?: AbortSignal) => request<QueryVersion>(`/api/queries/${id}`, 'GET', undefined, signal),
   createQuery: (input: QueryInput) => request<QueryCreated>('/api/queries', 'POST', input),
   approve: (id: number) => request<{ id: number; status: 'approved' }>(`/api/queries/${id}/approve`, 'POST'),
-  pull: (id: number) => request<Job>(`/api/queries/${id}/fetch`, 'POST'),
+  pull: (id: number, limit?: number) => request<Job>(`/api/queries/${id}/fetch${limit === undefined ? '' : `?limit=${limit}`}`, 'POST'),
   pipeline: (id: number) => request<Job>(`/api/pipeline/run?query_id=${id}`, 'POST'),
   records: (filters: RecordFilters = {}, signal?: AbortSignal) => {
     const params = new URLSearchParams();

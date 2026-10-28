@@ -27,6 +27,27 @@ def pull(client, id):
     return response.json()
 
 
+def test_selected_pull_limit_expands_without_removing_links(review, monkeypatch):
+    client, factory, source = review
+    query_id = save(client)
+    assert client.post(f"/api/queries/{query_id}/approve").status_code == 200
+    assert client.post(f"/api/queries/{query_id}/fetch?limit=1").status_code == 200
+    assert client.get(f"/api/queries/{query_id}").json()["counts"]["records"] == 1
+    assert client.post(f"/api/queries/{query_id}/fetch?limit=3").status_code == 200
+    assert client.get(f"/api/queries/{query_id}").json()["counts"]["records"] == 2
+    logs = client.get(f"/api/runs?query_id={query_id}").json()
+    assert [log["counts"]["requested_limit"] for log in logs] == [1, 3]
+    assert source.fetches == [["1"], ["2"]]
+    with factory() as session:
+        assert session.scalar(select(func.count()).select_from(m.Record)) == 2
+        assert session.scalar(select(func.count()).select_from(m.QueryRecord)) == 2
+    monkeypatch.setenv("FETCH_CAP", "2")
+    blocked = client.post(f"/api/queries/{query_id}/fetch?limit=3")
+    assert blocked.status_code == 422 and "FETCH_CAP" in blocked.json()["detail"]
+    assert client.post(f"/api/queries/{query_id}/fetch?limit=0").status_code == 422
+    assert len(client.get(f"/api/runs?query_id={query_id}").json()) == 2
+
+
 def run(client, id):
     response = client.post(f"/api/pipeline/run?query_id={id}")
     assert response.status_code == 200, response.text

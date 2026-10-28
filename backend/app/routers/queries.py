@@ -1,5 +1,7 @@
 """Immutable query versions and approval-gated background fetching."""
 
+import os
+
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -87,11 +89,23 @@ def approve_query(id: int, db: DB):
 
 
 @router.post("/{id}/fetch", response_model=s.JobStarted)
-def fetch_query(id: int, background_tasks: BackgroundTasks, db: DB):
+def fetch_query(
+    id: int,
+    background_tasks: BackgroundTasks,
+    db: DB,
+    limit: int | None = Query(default=None, gt=0),
+):
     require(db, m.Query, id)
+    cap = max(0, int(os.getenv("FETCH_CAP", "500")))
+    if limit is not None and limit > cap:
+        raise HTTPException(
+            422,
+            f"Requested limit exceeds the server maximum ({cap}). "
+            "Choose a smaller number or increase FETCH_CAP in the backend .env and restart.",
+        )
     with pipeline.job_lock:
         try:
-            run = pipeline.enqueue(db, id, "fetch")
+            run = pipeline.enqueue(db, id, "fetch", fetch_limit=limit)
         except ValueError as exc:
             raise HTTPException(409, str(exc)) from None
     background_tasks.add_task(pipeline.execute, run.id, db.get_bind())

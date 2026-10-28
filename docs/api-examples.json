@@ -122,9 +122,12 @@
     },
     {
       "method": "POST",
-      "path": "/api/queries/1/fetch",
+      "path": "/api/queries/1/fetch?limit=10",
       "status_code": 200,
       "content_type": "application/json",
+      "query_parameters": {
+        "limit": "Optional positive integer up to FETCH_CAP. Omitted uses the server default. The selected limit is recorded in run_log.counts.requested_limit."
+      },
       "response": {
         "query_id": 1,
         "run_id": 1,

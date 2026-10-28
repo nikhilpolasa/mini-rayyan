@@ -74,19 +74,20 @@ function settleJobs() {
   for (const job of state.jobs.filter(job => job.finish <= Date.now())) {
     const run = state.runs.find(run => run.id === job.id)!;
     const query = state.queries.find(query => query.id === run.query_id)!;
-    if (run.step === 'fetch') { query.status = 'fetched'; state.links[query.id] = state.records.map(record => record.id); }
-    run.status = 'completed'; run.finished_at = now(); run.counts = { records_in: state.records.length, records_added: 0, seconds: 1.2 };
+    const fetched = run.step === 'fetch' ? state.records.slice(0, run.counts.requested_limit ?? state.records.length).map(record => record.id) : [];
+    if (run.step === 'fetch') { query.status = 'fetched'; state.links[query.id] = [...new Set([...(state.links[query.id] ?? []), ...fetched])]; }
+    run.status = 'completed'; run.finished_at = now(); run.counts = { ...run.counts, records_in: run.step === 'fetch' ? fetched.length : state.records.length, records_added: 0, seconds: 1.2 };
     if (run.step === 'pipeline') for (const step of ['dedup', 'screen', 'pico']) state.runs.push({ ...run, id: idNext(state.runs), step, rule_set_version: `${step}-v1`, counts: { records_in: state.records.length, seconds: 0 } });
   }
   state.jobs = state.jobs.filter(job => job.finish > Date.now());
   refreshCounts(); persist();
 }
 
-function startJob(query: QueryVersion, step: string): Job {
+function startJob(query: QueryVersion, step: string, limit?: number): Job {
   if (state.runs.some(run => run.query_id === query.id && ['queued', 'running'].includes(run.status))) throw new Error('A job is already running for this query.');
   if (step === 'fetch' && !['approved', 'fetched'].includes(query.status)) throw new Error('Approve this query before pulling abstracts.');
   if (step === 'pipeline' && query.status !== 'fetched') throw new Error('Pull abstracts before running the pipeline.');
-  const run: Run = { id: idNext(state.runs), query_id: query.id, step, rule_set_version: `${step}-v1`, status: 'running', counts: {}, started_at: now(), finished_at: null };
+  const run: Run = { id: idNext(state.runs), query_id: query.id, step, rule_set_version: `${step}-v1`, status: 'running', counts: limit === undefined ? {} : { requested_limit: limit }, started_at: now(), finished_at: null };
   state.runs.push(run); state.jobs.push({ id: run.id, finish: Date.now() + 1200 });
   if (step === 'fetch') query.status = 'fetching';
   return { query_id: query.id, run_id: run.id, status: 'queued' };
@@ -173,7 +174,11 @@ export async function mockRequest<T>(path: string, method = 'GET', body?: unknow
     else {
       const query = requireItem(state.queries, query => query.id === id, 'Query');
       if (parts[3] === 'approve' && method === 'POST') { if (query.status === 'fetching') throw new Error('This query is already fetching.'); query.status = 'approved'; result = { id, status: 'approved' }; }
-      else if (parts[3] === 'fetch' && method === 'POST') result = startJob(query, 'fetch');
+      else if (parts[3] === 'fetch' && method === 'POST') {
+        const limit = url.searchParams.has('limit') ? Number(url.searchParams.get('limit')) : undefined;
+        if (limit !== undefined && (!Number.isInteger(limit) || limit < 1 || limit > 500)) throw new Error('Choose a limit from 1 to 500 records.');
+        result = startJob(query, 'fetch', limit);
+      }
       else result = query;
     }
   } else if (resource === 'pipeline') result = startJob(requireItem(state.queries, query => query.id === Number(url.searchParams.get('query_id')), 'Query'), 'pipeline');

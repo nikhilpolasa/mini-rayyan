@@ -15,6 +15,22 @@ function view(component: React.ReactNode) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   return render(<QueryClientProvider client={client}>{component}</QueryClientProvider>);
 }
+it('uses the selected fetch limit and keeps earlier linked mock records', async () => {
+  const query = await api.createQuery({ text: 'new[tiab]', date_from: '2020-01-01', date_to: '2026-01-01' });
+  await api.approve(query.id);
+  await api.pull(query.id, 1);
+  const time = Date.now();
+  vi.spyOn(Date, 'now').mockReturnValue(time + 2000);
+  await api.runs();
+  vi.restoreAllMocks();
+  expect((await api.query(query.id)).counts.records).toBe(1);
+  await api.pull(query.id, 10);
+  vi.spyOn(Date, 'now').mockReturnValue(time + 4000);
+  await api.runs();
+  vi.restoreAllMocks();
+  expect((await api.query(query.id)).counts.records).toBeGreaterThan(1);
+  expect((await api.runs()).filter(run => run.step === 'fetch').map(run => run.counts.requested_limit)).toEqual([1, 10]);
+});
 async function fetchedQuery() {
   await api.approve(1); await api.pull(1);
   const time = Date.now(); vi.spyOn(Date, 'now').mockReturnValue(time + 2000);

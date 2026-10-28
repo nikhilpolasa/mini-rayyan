@@ -129,7 +129,9 @@ def query_groups(text: str) -> list[list[str]]:
     return groups
 
 
-def enqueue(session: Session, query_id: int, step: str) -> m.RunLog:
+def enqueue(
+    session: Session, query_id: int, step: str, *, fetch_limit: int | None = None
+) -> m.RunLog:
     """Persist a queued job and reject invalid lifecycle transitions."""
     query = session.get(m.Query, query_id)
     if query is None:
@@ -152,7 +154,7 @@ def enqueue(session: Session, query_id: int, step: str) -> m.RunLog:
         step=step,
         rule_set_version="fetch-v1" if step == "fetch" else PIPELINE_VERSION,
         status="queued",
-        counts_json={},
+        counts_json={"requested_limit": fetch_limit} if fetch_limit is not None else {},
     )
     session.add(run)
     if step == "fetch":
@@ -197,9 +199,11 @@ def _insert_record(session: Session, data: dict) -> m.Record:
         return record
 
 
-def fetch(session: Session, query: m.Query) -> dict:
+def fetch(session: Session, query: m.Query, limit: int | None = None) -> dict:
     """Fetch only unseen IDs, but link all returned existing/new records."""
     cap = max(0, int(os.getenv("FETCH_CAP", "500")))
+    if limit is not None:
+        cap = min(cap, limit)
     with source_client() as client:
         ids = list(
             dict.fromkeys(
@@ -481,20 +485,21 @@ def execute(run_id: int, bind) -> None:
         run.status, run.started_at = "running", utc_now()
         session.commit()
         start = perf_counter()
+        requested = dict(run.counts_json)
         try:
             query = session.get(m.Query, run.query_id)
             counts = (
-                fetch(session, query)
+                fetch(session, query, requested.get("requested_limit"))
                 if run.step == "fetch"
                 else process(session, query)
             )
-            run.counts_json = {**counts, "seconds": round(perf_counter() - start, 6)}
+            run.counts_json = {**requested, **counts, "seconds": round(perf_counter() - start, 6)}
             run.status = "completed"
         except Exception as exc:
             session.rollback()
             run = session.get(m.RunLog, run_id)
             run.status = "failed"
-            run.counts_json = {"seconds": round(perf_counter() - start, 6)}
+            run.counts_json = {**requested, "seconds": round(perf_counter() - start, 6)}
             if run.step == "fetch":
                 session.get(m.Query, run.query_id).status = "failed"
             logging.error("%s job %d failed (%s)", run.step, run_id, type(exc).__name__)
