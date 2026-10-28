@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, isMockMode } from './api';
 import { Icon, LoadState, useAction, useRoute, useQueryContext, useProjectContext, queryLink } from './components';
 import { QueriesPage, RecordsPage, RecordPageView, DuplicatesPage, CriteriaPage, ExportPage, DecisionsPage } from './pages';
+import { DiffPage, AsOfPage } from './level2';
 
 const links = [
   { path: '/queries', icon: 'search', label: 'Queries' },
@@ -21,12 +22,12 @@ export default function App() {
   const [creating, setCreating] = useState(false), [title, setTitle] = useState('');
   const createProject = useAction(api.createProject);
   const queryClient = useQueryClient();
-  const runs = useQuery({ queryKey: ['runs', projectId], queryFn: ({ signal }) => api.runs(undefined, signal), refetchInterval: query => query.state.data?.some(run => ['queued', 'running'].includes(run.status)) ? 1200 : false });
+  const runs = useQuery({ queryKey: ['runs', projectId, queryId ?? null], queryFn: ({ signal }) => api.runs(undefined, signal), refetchInterval: query => query.state.data?.some(run => ['queued', 'running'].includes(run.status)) ? 1200 : false });
   const finishedJobs = runs.data?.filter(run => ['completed', 'failed'].includes(run.status)).map(run => `${run.id}:${run.status}`).join(',');
   useEffect(() => {
     if (finishedJobs) for (const key of ['queries', 'records', 'record', 'duplicates']) void queryClient.invalidateQueries({ queryKey: [key] });
   }, [finishedJobs, queryClient]);
-  const health = useQuery({ queryKey: ['health', projectId], queryFn: ({ signal }) => api.health(signal), refetchInterval: isMockMode() ? false : 30000 });
+  const health = useQuery({ queryKey: ['health', projectId, queryId ?? null], queryFn: ({ signal }) => api.health(signal), refetchInterval: isMockMode() ? false : 30000 });
   const active = links.find(link => route === link.path || route.startsWith(link.path + '/'));
   const recordId = /^\/records\/(\d+)$/.exec(route)?.[1];
   return <div className="app-shell">
@@ -57,7 +58,7 @@ export default function App() {
       <main id="main-content" tabIndex={-1}>
         <p className="notice">Search histories are separate. Review decisions, duplicate groups and criteria are still shared across searches.</p>
         {isMockMode() && <div className="demo-banner"><span className="demo-label">DEMO</span> Fictional example data. Changes stay in this browser tab.</div>}
-        {route === '/queries' ? <QueriesPage key={projectId}/> : route === '/records' ? <RecordsPage key={projectId}/> : recordId ? <RecordPageView key={`${projectId}:${recordId}`} id={Number(recordId)}/> : route === '/duplicates' ? <DuplicatesPage/> : route === '/criteria' ? <CriteriaPage/> : route === '/export' ? <ExportPage/> : route === '/decisions' ? <DecisionsPage/> : <div className="empty"><h1>Page not found</h1><a className="btn" href={queryLink('/queries', undefined, projectId)}>Go to queries</a></div>}
+        {route === '/queries' ? <QueriesPage key={projectId}/> : route === '/queries/diff' ? <DiffPage/> : route === '/queries/as-of' ? <AsOfPage/> : route === '/records' ? <RecordsPage key={projectId}/> : recordId ? <RecordPageView key={`${projectId}:${recordId}`} id={Number(recordId)}/> : route === '/duplicates' ? <DuplicatesPage/> : route === '/criteria' ? <CriteriaPage/> : route === '/export' ? <ExportPage/> : route === '/decisions' ? <DecisionsPage/> : <div className="empty"><h1>Page not found</h1><a className="btn" href={queryLink('/queries', undefined, projectId)}>Go to queries</a></div>}
       </main>
       <footer><span><Icon name="book" size={15}/> Powered by PubMed · Built for thoughtful review</span><p>NCBI/NLM provides PubMed content without endorsing individual studies. Abstracts may be copyrighted; do not redistribute them. <a href="https://www.ncbi.nlm.nih.gov/home/about/policies/" target="_blank" rel="noreferrer">NCBI disclaimer ↗</a></p></footer>
     </div>

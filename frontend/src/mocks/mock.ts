@@ -1,6 +1,6 @@
 /** Browser-local fixture adapter. No external HTTP; samples originate in docs/api-examples.json. */
 import examples from './api-examples.json';
-import type { Criterion, Decision, DecisionInput, Duplicates, Job, Label, PicoSpan, Project, QueryInput, QueryVersion, RecordDetail, Run } from '../types';
+import type { Criterion, Decision, DecisionInput, Duplicates, Job, Label, PicoSpan, Project, QueryInput, QueryVersion, RecordDetail, Run, VersionState, VersionDiff } from '../types';
 
 function example<T>(path: string): T {
   const endpoint = examples.endpoints.find(item => item.method === 'GET' && item.path.split('?')[0] === path);
@@ -39,6 +39,25 @@ function load(): State {
 let state = load();
 function persist() { try { sessionStorage.setItem(storageKey, JSON.stringify(state)); } catch { /* Private browsing fallback. */ } }
 export function resetMock() { state = initialState(); persist(); }
+async function mockAsOf(queryId: number): Promise<VersionState> {
+  requireItem(state.queries, query => query.id === queryId, 'Query');
+  const ids = [...(state.links[queryId] ?? [])].sort((a, b) => a - b);
+  const groups = state.duplicates.groups.map(group => group.members.map(member => member.record_id).filter(id => ids.includes(id))).filter(members => members.length > 1).map(members => ({ representative_record_id: Math.min(...members), members, hidden: members.filter(id => id !== Math.min(...members)) }));
+  const grouped = new Set(groups.flatMap(group => group.members));
+  groups.push(...ids.filter(id => !grouped.has(id)).map(id => ({ representative_record_id: id, members: [id], hidden: [] })));
+  groups.sort((a, b) => a.representative_record_id - b.representative_record_id);
+  const structure = { record_ids: ids, groups };
+  const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify(structure)));
+  const effective_labels = Object.fromEntries(ids.map(id => { const record = recordView(requireItem(state.records, record => record.id === id, 'Record')); return [id, { label: record.label, reason: record.reason, criterion: record.criterion, source: record.source }]; }));
+  return { query_id: queryId, ...structure, effective_labels, state_hash: Array.from(new Uint8Array(bytes), byte => byte.toString(16).padStart(2, '0')).join('') };
+}
+async function mockDiff(queryId: number, baseId: number): Promise<VersionDiff> {
+  const current = await mockAsOf(queryId), base = await mockAsOf(baseId);
+  const added = current.record_ids.filter(id => !base.record_ids.includes(id)), removed = base.record_ids.filter(id => !current.record_ids.includes(id)), common = current.record_ids.filter(id => base.record_ids.includes(id));
+  const oldGroup = new Map(base.groups.flatMap(group => group.members.map(id => [id, group.representative_record_id] as const)));
+  const groups_newly_merged = current.groups.filter(group => group.members.length > 1 && (group.members.some(id => added.includes(id)) || new Set(group.members.map(id => oldGroup.get(id)).filter(id => id !== undefined)).size > 1)).map(group => ({ representative_record_id: group.representative_record_id, member_ids: group.members, base_group_ids: [...new Set(group.members.map(id => oldGroup.get(id)).filter(id => id !== undefined))] as number[] }));
+  return { query_id: queryId, base_query_id: baseId, records_added: added, records_removed: removed, records_common: common, groups_newly_merged, counts: { added: added.length, removed: removed.length, common: common.length, groups_newly_merged: groups_newly_merged.length }, added_effective_labels: Object.fromEntries(added.map(id => [id, current.effective_labels[id]])), common_with_human_decision: common.filter(id => state.decisions.some(decision => decision.entity_type === 'record' && Number(decision.entity_id) === id)) };
+}
 function requireItem<T>(items: T[], predicate: (item: T) => boolean, name: string): T {
   const result = items.find(predicate); if (!result) throw new Error(`${name} not found in the mock workspace.`); return result;
 }
@@ -173,7 +192,9 @@ export async function mockRequest<T>(path: string, method = 'GET', body?: unknow
     }
     else {
       const query = requireItem(state.queries, query => query.id === id, 'Query');
-      if (parts[3] === 'approve' && method === 'POST') { if (query.status === 'fetching') throw new Error('This query is already fetching.'); query.status = 'approved'; result = { id, status: 'approved' }; }
+      if (parts[3] === 'as-of' && method === 'GET') result = await mockAsOf(id);
+      else if (parts[3] === 'diff' && method === 'GET') { const base = Number(url.searchParams.get('base') ?? query.parent_id); if (!base) throw new Error('This query has no parent; supply a base query ID'); result = await mockDiff(id, base); }
+      else if (parts[3] === 'approve' && method === 'POST') { if (query.status === 'fetching') throw new Error('This query is already fetching.'); query.status = 'approved'; result = { id, status: 'approved' }; }
       else if (parts[3] === 'fetch' && method === 'POST') {
         const limit = url.searchParams.has('limit') ? Number(url.searchParams.get('limit')) : undefined;
         if (limit !== undefined && (!Number.isInteger(limit) || limit < 1 || limit > 500)) throw new Error('Choose a limit from 1 to 500 records.');

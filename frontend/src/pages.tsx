@@ -3,12 +3,14 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, isMockMode } from './api';
 import { Badge, Empty, Feedback, Icon, LoadState, PageHeading, PicoAbstract, dateText, picoLabels, useAction, useQueryContext, useProjectContext, queryLink } from './components';
 import type { DecisionInput, Label, PicoSpan, QueryInput, QueryVersion } from './types';
+import { showOffHoursAdvisory } from './level2';
 
 export function QueriesPage() {
   const projectId = useProjectContext();
   const queryClient = useQueryClient();
   const queries = useQuery({ queryKey: ['queries', projectId], queryFn: ({ signal }) => api.queries(signal, projectId), refetchInterval: query => query.state.data?.some(item => item.status === 'fetching') ? 1200 : false });
-  const runs = useQuery({ queryKey: ['runs', projectId], queryFn: ({ signal }) => api.runs(undefined, signal), refetchInterval: query => query.state.data?.some(item => ['queued', 'running'].includes(item.status)) ? 1200 : false });
+  const selectedQuery = useQueryContext();
+  const runs = useQuery({ queryKey: ['runs', projectId, selectedQuery ?? null], queryFn: ({ signal }) => api.runs(undefined, signal), refetchInterval: query => query.state.data?.some(item => ['queued', 'running'].includes(item.status)) ? 1200 : false });
   const [form, setForm] = useState<QueryInput>({ text: '', date_from: '2016-01-01', date_to: new Date().toISOString().slice(0, 10) });
   const [formError, setFormError] = useState('');
   const [parentId, setParentId] = useState<number | null>(null);
@@ -54,7 +56,8 @@ export function QueriesPage() {
         {busy && <div className="job-progress" role="status"><div className="progress-track"><div/></div><p>{latestRun?.step === 'pipeline' ? 'Deduplicating → screening → tagging PICO' : 'Pulling abstracts in the background'} · elapsed time and counts appear below.</p></div>}
         {latestRun?.status === 'failed' && <p className="notice notice-error" role="alert">The {latestRun.step} job failed. For a fetch failure, approve this query again and retry. Check source availability if the problem continues.</p>}
         {latestRun?.status === 'completed' && <p className="run-summary"><Icon name="check" size={15}/>{latestRun.step} completed{latestRun.counts.seconds !== undefined ? ` in ${latestRun.counts.seconds}s` : ''}{latestRun.counts.records_in !== undefined ? ` · ${latestRun.counts.records_in} records processed` : ''}</p>}
-        <div className="version-actions"><button className="btn btn-small" disabled={action.isPending || !!busy || query.status === 'approved' || query.status === 'fetched'} onClick={() => action.mutate({ type: 'approve', id: query.id })}><Icon name="check" size={15}/> Approve</button><label htmlFor={`pull-limit-${query.id}`}>Pull up to</label><select id={`pull-limit-${query.id}`} value={pullLimits[query.id] ?? ''} onChange={event => setPullLimits({ ...pullLimits, [query.id]: event.target.value })} disabled={action.isPending || !!busy}><option value="">Server default</option>{[10, 25, 50, 100, 250, 500].map(count => <option key={count} value={count}>{count} records</option>)}</select><button className="btn btn-small btn-primary" disabled={action.isPending || !!busy || !['approved', 'fetched'].includes(query.status)} onClick={() => action.mutate({ type: 'pull', id: query.id })}><Icon name="download" size={15}/> Pull abstracts</button><button className="btn btn-small" disabled={action.isPending || !!busy || query.status !== 'fetched'} onClick={() => action.mutate({ type: 'pipeline', id: query.id })}>Run pipeline <Icon name="arrow" size={15}/></button><button className="text-button clone-button" onClick={() => { setForm({ text: query.text, date_from: query.date_from, date_to: query.date_to }); setParentId(query.id); document.getElementById('query-text')?.focus(); }}>Revise (new version)</button></div>
+        {showOffHoursAdvisory(query.hit_count) && <p className="notice" role="note">For large pulls, NCBI recommends a weekend or 9 pm to 5 am US Eastern. You can still pull now.</p>}
+        <div className="version-actions"><button className="btn btn-small" disabled={action.isPending || !!busy || query.status === 'approved' || query.status === 'fetched'} onClick={() => action.mutate({ type: 'approve', id: query.id })}><Icon name="check" size={15}/> Approve</button><label htmlFor={`pull-limit-${query.id}`}>Pull up to</label><select id={`pull-limit-${query.id}`} value={pullLimits[query.id] ?? ''} onChange={event => setPullLimits({ ...pullLimits, [query.id]: event.target.value })} disabled={action.isPending || !!busy}><option value="">Server default</option>{[10, 25, 50, 100, 250, 500].map(count => <option key={count} value={count}>{count} records</option>)}</select><button className="btn btn-small btn-primary" disabled={action.isPending || !!busy || !['approved', 'fetched'].includes(query.status)} onClick={() => action.mutate({ type: 'pull', id: query.id })}><Icon name="download" size={15}/> Pull abstracts</button><button className="btn btn-small" disabled={action.isPending || !!busy || query.status !== 'fetched'} onClick={() => action.mutate({ type: 'pipeline', id: query.id })}>Run pipeline <Icon name="arrow" size={15}/></button>{query.parent_id && <a className="btn btn-small" href={queryLink('/queries/diff', query.id, projectId)}>Compare with parent</a>}<a className="btn btn-small" href={queryLink('/queries/as-of', query.id, projectId)}>View this version</a><button className="text-button clone-button" onClick={() => { setForm({ text: query.text, date_from: query.date_from, date_to: query.date_to }); setParentId(query.id); document.getElementById('query-text')?.focus(); }}>Revise (new version)</button></div>
       </article>;
     })}</div>
   </>;
@@ -66,7 +69,7 @@ export function RecordsPage() {
   const [label, setLabel] = useState(''), [hidden, setHidden] = useState(false), [limit, setLimit] = useState(25), [offset, setOffset] = useState(0);
   const queries = useQuery({ queryKey: ['queries', projectId], queryFn: ({ signal }) => api.queries(signal, projectId) });
   const filters = { query_id: queryId, label: label ? label as Label : undefined, show_hidden: hidden, limit, offset };
-  const records = useQuery({ queryKey: ['records', projectId, filters], queryFn: ({ signal }) => api.records(filters, signal), refetchInterval: 5000 });
+  const records = useQuery({ queryKey: ['records', projectId, queryId ?? null, filters], queryFn: ({ signal }) => api.records(filters, signal), refetchInterval: 5000 });
   function filter(action: () => void) { action(); setOffset(0); }
   return <><PageHeading eyebrow="02 / SCREEN & REVIEW" title="Every record deserves a clear decision.">Read the evidence, understand the reason, and keep the final say.</PageHeading>
     <section className="panel"><div className="filter-bar"><div><label htmlFor="version-filter">Query version</label><select id="version-filter" value={queryId ?? ''} onChange={event => filter(() => { window.location.hash = queryLink('/records', event.target.value ? Number(event.target.value) : undefined, projectId); })}><option value="">All stored records (shared)</option>{queries.data?.map(query => <option key={query.id} value={query.id}>Version {query.version} · {query.text.slice(0, 38)}</option>)}</select></div><div><label htmlFor="label-filter">Screening label</label><select id="label-filter" value={label} onChange={event => filter(() => setLabel(event.target.value))}><option value="">All labels</option><option value="include">Include</option><option value="exclude">Exclude</option><option value="maybe">Maybe</option></select></div><label className="check-label"><input type="checkbox" checked={hidden} onChange={event => filter(() => setHidden(event.target.checked))}/> Show hidden duplicates</label></div>
@@ -113,11 +116,21 @@ export function RecordPageView({ id }: { id: number }) {
 
 export function DuplicatesPage() {
   const projectId = useProjectContext();
-  const duplicates = useQuery({ queryKey: ['duplicates', projectId], queryFn: ({ signal }) => api.duplicates(signal) });
+  const queryId = useQueryContext();
+  const duplicates = useQuery({ queryKey: ['duplicates', projectId, queryId ?? null], queryFn: ({ signal }) => api.duplicates(signal) });
+  const decisions = useQuery({ queryKey: ['decisions', projectId, queryId ?? null, 'conflicts'], queryFn: ({ signal }) => api.decisions(signal) });
   const action = useAction(api.decide);
   const [note, setNote] = useState('');
+  const [resolutions, setResolutions] = useState<Record<number, Label>>({});
   const data = duplicates.data;
-  return <><PageHeading eyebrow="03 / RESOLVE THE OVERLAP" title="One study. One place in your review.">Confirm uncertain matches. Duplicate records are hidden, never deleted.</PageHeading><LoadState pending={duplicates.isPending} error={duplicates.error} retry={duplicates.refetch}/><Feedback action={action} success="Duplicate decision recorded."/>
+  const conflicts = data?.groups.map(group => {
+    const members = group.members.map(member => ({ id: member.record_id, decision: [...(decisions.data ?? [])].reverse().find(decision => decision.entity_type === 'record' && Number(decision.entity_id) === member.record_id && ['include', 'exclude', 'maybe'].includes(String((decision.new_value as { label?: string } | null)?.label))) }));
+    const resolution = [...(decisions.data ?? [])].reverse().find(decision => decision.entity_type === 'group' && Number(decision.entity_id) === group.id && ['include', 'exclude', 'maybe'].includes(String((decision.new_value as { label?: string } | null)?.label)));
+    const different = new Set(members.filter(member => member.decision).map(member => (member.decision!.new_value as { label: Label }).label)).size > 1;
+    return { group, members, active: different && (!resolution || members.some(member => member.decision && member.decision.id > resolution.id)) };
+  }).filter(item => item.active) ?? [];
+  return <><PageHeading eyebrow="03 / RESOLVE THE OVERLAP" title="One study. One place in your review.">Confirm uncertain matches. Duplicate records are hidden, never deleted.</PageHeading><LoadState pending={duplicates.isPending || decisions.isPending} error={duplicates.error ?? decisions.error} retry={() => { void duplicates.refetch(); void decisions.refetch(); }}/><Feedback action={action} success="Duplicate decision recorded."/>
+    {conflicts.map(({ group, members }) => <section className="panel" key={`conflict-${group.id}`}><h2>Conflict in group #{group.id}</h2><p>Members have different reviewer labels. Choose a group decision.</p>{members.map(member => <div className="member-row" key={member.id}><span>Record #{member.id}</span>{member.decision ? <><Badge label={(member.decision.new_value as { label: Label }).label}/><small>{member.decision.actor} · {dateText(member.decision.created_at)} {new Date(member.decision.created_at).toLocaleTimeString()}</small></> : <small>No human label</small>}</div>)}<div className="version-actions"><label htmlFor={`resolve-${group.id}`}>Resolve group label</label><select id={`resolve-${group.id}`} value={resolutions[group.id] ?? 'maybe'} onChange={event => setResolutions({ ...resolutions, [group.id]: event.target.value as Label })}><option value="include">Include</option><option value="exclude">Exclude</option><option value="maybe">Maybe</option></select><button className="btn btn-primary" disabled={action.isPending} onClick={() => action.mutate({ entity_type: 'group', entity_id: group.id, action: 'set_label', new_value: { label: resolutions[group.id] ?? 'maybe', record_ids: group.members.map(member => member.record_id) }, note })}>Resolve conflict</button></div></section>)}
     {data && <><div className="section-heading"><div><h2>Needs your review <span className="count-pill">{data.uncertain_pairs.length}</span></h2><p>Similarity suggests a match. You decide whether it is the same paper.</p></div></div><label htmlFor="duplicate-note">Decision note (optional)</label><input id="duplicate-note" value={note} onChange={event => setNote(event.target.value)} placeholder="Add context for your confirmations or rejections" className="duplicate-note"/>
       {!data.uncertain_pairs.length && <section className="panel"><Empty title="No uncertain pairs waiting">New candidates will appear here after deduplication.</Empty></section>}
       <div className="pair-list">{data.uncertain_pairs.map(pair => <article className="panel pair-card" key={pair.record_ids.join(':')}><div className="pair-top"><span className="status status-saved">Pending review</span><span className="similarity"><strong>{Math.round(pair.score * 100)}%</strong> similarity · {pair.match_type}</span></div><div className="pair-records">{pair.record_ids.map((id, index) => <div key={id}><span className="eyebrow">CANDIDATE {index + 1}</span><a href={`#/records/${id}`}>Record #{id} <Icon name="arrow" size={16}/></a><p>Open the record to compare its title, abstract and publication metadata.</p></div>)}</div><div className="pair-actions"><button className="btn btn-primary" disabled={action.isPending} onClick={() => action.mutate({ entity_type: 'pair', entity_id: [...pair.record_ids].sort((a, b) => a - b).join(':'), action: 'confirm', new_value: { status: 'confirmed' }, note })}><Icon name="check" size={16}/> Confirm duplicate</button><button className="btn" disabled={action.isPending} onClick={() => action.mutate({ entity_type: 'pair', entity_id: [...pair.record_ids].sort((a, b) => a - b).join(':'), action: 'reject', new_value: { status: 'rejected' }, note })}><Icon name="close" size={16}/> Keep separate</button></div></article>)}</div>
@@ -130,7 +143,8 @@ export function DuplicatesPage() {
 
 export function CriteriaPage() {
   const projectId = useProjectContext();
-  const criteria = useQuery({ queryKey: ['criteria', projectId], queryFn: ({ signal }) => api.criteria(signal) });
+  const queryId = useQueryContext();
+  const criteria = useQuery({ queryKey: ['criteria', projectId, queryId ?? null], queryFn: ({ signal }) => api.criteria(signal) });
   const action = useAction(({ key, active }: { key: string; active: boolean }) => api.toggleCriterion(key, active));
   return <><PageHeading eyebrow="04 / MAKE THE RULES EXPLICIT" title="A review with reasons you can see.">Choose your active screening criteria. Every toggle is recorded in the decision log.</PageHeading><div className="notice">After changing criteria, run the pipeline again from Queries. Human overrides remain intact.</div><LoadState pending={criteria.isPending} error={criteria.error} retry={criteria.refetch}/><Feedback action={action} success="Criterion updated and logged."/>
     {criteria.data?.length === 0 && <section className="panel"><Empty title="No criteria configured">Ask the backend maintainer to load the review’s criteria.</Empty></section>}
@@ -141,7 +155,7 @@ export function CriteriaPage() {
 export function ExportPage() {
   const projectId = useProjectContext();
   const queryId = useQueryContext();
-  const included = useQuery({ queryKey: ['records', projectId, 'export-preview', queryId ?? null], queryFn: ({ signal }) => api.records({ query_id: queryId, label: 'include', limit: 1 }, signal) });
+  const included = useQuery({ queryKey: ['records', projectId, queryId ?? null, 'export-preview'], queryFn: ({ signal }) => api.records({ query_id: queryId, label: 'include', limit: 1 }, signal) });
   const [downloaded, setDownloaded] = useState(false);
   const download = useAction(async () => {
     const blob = await api.exportCsv(queryId);
@@ -155,7 +169,8 @@ export function ExportPage() {
 
 export function DecisionsPage() {
   const projectId = useProjectContext();
-  const decisions = useQuery({ queryKey: ['decisions', projectId], queryFn: ({ signal }) => api.decisions(signal) });
+  const queryId = useQueryContext();
+  const decisions = useQuery({ queryKey: ['decisions', projectId, queryId ?? null], queryFn: ({ signal }) => api.decisions(signal) });
   const action = useAction(api.decide);
   return <><PageHeading eyebrow="06 / KEEP THE REASONING" title="A history you can stand behind.">Every reviewer change, in order. Undo adds a new entry; the original stays intact.</PageHeading><LoadState pending={decisions.isPending} error={decisions.error} retry={decisions.refetch}/><Feedback action={action} success="Undo recorded as a new decision."/>
     {decisions.data && <section className="panel"><div className="table-caption"><strong>{decisions.data.length} logged decisions</strong><span>Append-only audit history</span></div>{!decisions.data.length ? <Empty title="Your decision log starts with your first review">Overrides, notes, criteria changes and annotation edits appear here.</Empty> : <div className="table-scroll"><table className="audit-table"><thead><tr><th>WHEN / WHO</th><th>ENTITY / ACTION</th><th>CHANGE / NOTE</th><th/></tr></thead><tbody>{[...decisions.data].reverse().map(decision => {

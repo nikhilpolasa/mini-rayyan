@@ -1,5 +1,5 @@
 import { mockRequest } from './mocks/mock';
-import type { Criterion, Decision, DecisionInput, Duplicates, Job, Project, QueryCreated, QueryInput, QueryVersion, RecordDetail, RecordFilters, RecordPage, Run } from './types';
+import type { Criterion, Decision, DecisionInput, Duplicates, Job, Project, QueryCreated, QueryInput, QueryVersion, RecordDetail, RecordFilters, RecordPage, Run, VersionDiff, VersionState } from './types';
 
 const baseUrl = () => (import.meta.env.VITE_API_BASE_URL ?? '').trim().replace(/\/+$/, '');
 export const isMockMode = () => !baseUrl();
@@ -36,6 +36,8 @@ export const api = {
   createProject: (title: string) => request<Project>('/api/projects', 'POST', { title }),
   queries: (signal?: AbortSignal, projectId?: number) => request<QueryVersion[]>(`/api/queries${projectId === undefined ? '' : `?project_id=${projectId}`}`, 'GET', undefined, signal),
   query: (id: number, signal?: AbortSignal) => request<QueryVersion>(`/api/queries/${id}`, 'GET', undefined, signal),
+  asOf: (id: number, signal?: AbortSignal) => request<VersionState>(`/api/queries/${id}/as-of`, 'GET', undefined, signal),
+  diff: (id: number, base?: number, signal?: AbortSignal) => request<VersionDiff>(`/api/queries/${id}/diff${base === undefined ? '' : `?base=${base}`}`, 'GET', undefined, signal),
   createQuery: (input: QueryInput) => request<QueryCreated>('/api/queries', 'POST', input),
   approve: (id: number) => request<{ id: number; status: 'approved' }>(`/api/queries/${id}/approve`, 'POST'),
   pull: (id: number, limit?: number) => request<Job>(`/api/queries/${id}/fetch${limit === undefined ? '' : `?limit=${limit}`}`, 'POST'),

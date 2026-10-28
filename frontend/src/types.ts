@@ -38,4 +38,7 @@ export interface Run {
   started_at: string; finished_at: string | null;
 }
 export interface Job { query_id: number; run_id: number; status: 'queued' }
+export interface VersionGroup { representative_record_id: number; members: number[]; hidden: number[] }
+export interface VersionState { query_id: number; record_ids: number[]; groups: VersionGroup[]; effective_labels: Record<string, Pick<RecordSummary, 'label' | 'reason' | 'criterion' | 'source'>>; state_hash: string }
+export interface VersionDiff { query_id: number; base_query_id: number; records_added: number[]; records_removed: number[]; records_common: number[]; groups_newly_merged: { representative_record_id: number; member_ids: number[]; base_group_ids: number[] }[]; counts: { added: number; removed: number; common: number; groups_newly_merged: number }; added_effective_labels: VersionState['effective_labels']; common_with_human_decision: number[] }
 export interface Criterion { key: string; project_id: number; label: string; kind: string; description: string; reason: string; source: 'metadata' | 'algorithm' | 'both'; active: boolean }

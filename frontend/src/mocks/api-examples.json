@@ -1,6 +1,8 @@
 {
   "description": "Illustrative persisted API contracts. Optional query_id on record detail and CSV selects that query's machine context; omitted selectors retain latest-context behaviour. Human decisions remain authoritative across queries. CSV response excludes its UTF-8 BOM. Phase A adds projects as search threads: scoped query histories only; judgments, records, duplicates and criteria remain shared. Omitting project_id on POST queries uses legacy project 1; omitting the GET filter retains the existing unfiltered list.",
   "endpoints": [
+    {"method":"GET","path":"/api/queries/1/as-of","status_code":200,"content_type":"application/json","response":{"query_id":1,"record_ids":[1],"groups":[{"representative_record_id":1,"members":[1],"hidden":[]}],"effective_labels":{"1":{"label":"include","reason":"example","criterion":"","source":"machine"}},"state_hash":"example-hash"}},
+    {"method":"GET","path":"/api/queries/1/diff?base=1","status_code":200,"content_type":"application/json","response":{"query_id":1,"base_query_id":1,"records_added":[],"records_removed":[],"records_common":[1],"groups_newly_merged":[],"counts":{"added":0,"removed":0,"common":1,"groups_newly_merged":0},"added_effective_labels":{},"common_with_human_decision":[]}},
     {
       "method": "GET",
       "path": "/api/projects",
